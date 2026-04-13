@@ -26,17 +26,16 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ADAFRUIT_IO_USERNAME
-        sync: false # Bạn sẽ điền username Adafruit vào Dashboard Render
+        sync: false
       - key: ADAFRUIT_IO_KEY
-        sync: false # Bạn sẽ điền key Adafruit vào Dashboard Render
+        sync: false
 
   - type: web
     name: yolohome-frontend
     env: static
-    plan: free
     rootDir: frontend
     buildCommand: npm install && npm run build:web
     staticPublishPath: dist
     envVars:
       - key: EXPO_PUBLIC_API_URL
-        sync: false # Bạn sẽ điền URL của Backend vào đây sau khi Backend có URL (ví dụ: https://yolohome-backend.onrender.com/api)
+        sync: false
