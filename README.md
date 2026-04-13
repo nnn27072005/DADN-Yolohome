@@ -1,4 +1,4 @@
-# 🌿 Smart Greenhouse IoT System
+# 🌿 Smart Yolohome IoT System
 
 <div align="center">
 
