@@ -9,7 +9,7 @@ services:
     name: yolohome-backend
     env: node
     plan: free
-    rootDirectory: backend
+    rootDir: backend
     buildCommand: npm install
     startCommand: npm start
     envVars:
@@ -34,7 +34,7 @@ services:
     name: yolohome-frontend
     env: static
     plan: free
-    rootDirectory: frontend
+    rootDir: frontend
     buildCommand: npm install && npm run build:web
     staticPublishPath: dist
     envVars:
