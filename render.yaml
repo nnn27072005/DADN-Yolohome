@@ -26,9 +26,9 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ADAFRUIT_IO_USERNAME
-        sync: false # User will set this in Render UI
+        sync: false # Bạn sẽ điền username Adafruit vào Dashboard Render
       - key: ADAFRUIT_IO_KEY
-        sync: false # User will set this in Render UI
+        sync: false # Bạn sẽ điền key Adafruit vào Dashboard Render
 
   - type: web
     name: yolohome-frontend
@@ -39,7 +39,4 @@ services:
     staticPublishPath: dist
     envVars:
       - key: EXPO_PUBLIC_API_URL
-        fromService:
-          name: yolohome-backend
-          type: web
-          property: url
+        sync: false # Bạn sẽ điền URL của Backend vào đây sau khi Backend có URL (ví dụ: https://yolohome-backend.onrender.com/api)
