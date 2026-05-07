@@ -1,7 +1,7 @@
 const settingsRepository = require('../repository/settingsRepository');
 const { publishToFeed } = require(`./mqttpublisher`);
 //
-const { getPrediction } = require('../GreenhouseModel/prediction');
+const { getPrediction } = require('../YolohomeModel/prediction');
 const sensorRepository = require('../repository/sensorRepository');
 const settingsmodel = require('../models/settingsModel');
 const { broadcast } = require("./webSocketService");
@@ -30,7 +30,7 @@ function determineMQttPayload(deviceName, data) {
         switch (deviceName) {
             case 'led':
                 // intensity: 0-1
-                payload = 1;
+                payload = data.status ? (data.intensity !== undefined ? data.intensity / 100 : 1) : 0;
                 break;
             case 'fan':
                 // intensity: 0-100
@@ -284,22 +284,6 @@ class SettingsService{
                           Temperature: latestSensors["thermal"].value,
                           Humidity: latestSensors["humid"].value,
                           Minute_Of_Day: minuteOfDay,
-                        };
-                      } else {
-                        canPredict = false;
-                      }
-                      break;
-                    // =============== PUMP =================
-                    case "pump":
-                      if (
-                        latestSensors["earth-humid"] &&
-                        latestSensors["thermal"] &&
-                        latestSensors["humid"]
-                      ) {
-                        relevantInputData = {
-                          "Soil Moisture": latestSensors["earth-humid"].value,
-                          Temperature: latestSensors["thermal"].value,
-                          "Air humidity (%)": latestSensors["humid"].value,
                         };
                       } else {
                         canPredict = false;

@@ -125,6 +125,7 @@ export default function HomeScreen() {
       return response ?? [];
     },
     enabled: isAuthenticated,
+    refetchInterval: 5000,
   });
 
   const handleRefresh = () => {

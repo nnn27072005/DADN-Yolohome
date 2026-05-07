@@ -99,7 +99,7 @@ server.listen(PORT, () => {
 
 
 
-  console.log(`Server running on port ${PORT}`);
+  console.log(`[YOLOHOME_BACKEND_V5] Server running on port ${PORT} (UTC+7 ENFORCED)`);
 });
 
 

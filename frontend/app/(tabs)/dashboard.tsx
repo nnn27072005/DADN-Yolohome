@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Dimensions,
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
   Image,
+  useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import Slider from "@react-native-community/slider";
 import { LineChart } from "react-native-gifted-charts";
 import { Calendar } from "react-native-calendars";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,7 +18,8 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiCall } from "@/utils/apiCall";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-const screenWidth = Dimensions.get("window").width;
+
+
 
 interface Dashboard {
   temperature: { value: number; label: string }[];
@@ -31,17 +33,23 @@ type Data = {
   value: number;
 };
 
-const testData: Data[] = [
-  { label: "8", value: 20 },
-  { label: "9", value: 20 },
-  { label: "12", value: 23 },
-  { label: "15", value: 25 },
-  { label: "18", value: 27 },
-  { label: "20", value: 28 },
-  { label: "23", value: 30 },
-];
+const generateRealtimeTestData = (): Data[] => {
+  const now = new Date();
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now.getTime() - (6 - i) * 15 * 60000); // 15 min intervals
+    return {
+      label: `${String(d.getHours()).padStart(2, "0")}:${String(
+        d.getMinutes()
+      ).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`,
+      value: 20 + Math.floor(Math.random() * 5),
+    };
+  });
+};
+
+const testData = generateRealtimeTestData();
 
 export default function DashboardScreen() {
+  const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [openCalendar, setOpenCalendar] = useState(false);
   const [type, setType] = useState(true);
@@ -51,25 +59,28 @@ export default function DashboardScreen() {
   const { isAuthenticated } = useAuth();
   const [dataTemp, setDataTemp] = useState<Data[]>([]);
   const [dataHumidity, setDataHumidity] = useState<Data[]>([]);
-  const [dataSoilMoisture, setDataSoilMoisture] = useState<Data[]>([]);
+  // const [dataSoilMoisture, setDataSoilMoisture] = useState<Data[]>([]);
   const [dataLight, setDataLight] = useState<Data[]>([]);
 
   const { data, isSuccess } = useQuery({
-    queryKey: ["dashboard"],
+    queryKey: ["dashboard", selectedDate.toLocaleDateString("en-CA")],
     queryFn: async () => {
+      const dateStr = selectedDate.toLocaleDateString("en-CA"); // YYYY-MM-DD in local time
       const response = await apiCall({
-        endpoint: `/dashboard/${selectedDate.toISOString().split("T")[0]}`, //YYYY-MM-DD
+        endpoint: `/dashboard/${dateStr}`,
       });
       const newData = replaceNullData(response);
       return newData;
     },
     enabled: isAuthenticated,
+    refetchInterval: 15000, // Sync with simulator interval
+    refetchOnWindowFocus: true,
   });
 
   const { data: updateData, mutate: updateDashboard } = useMutation({
     mutationFn: async () => {
       const response = await apiCall({
-        endpoint: `/dashboard/${selectedDate.toISOString().split("T")[0]}`, //YYYY-MM-DD
+        endpoint: `/dashboard/${selectedDate.toLocaleDateString("en-CA")}`, //YYYY-MM-DD
       });
       const data = replaceNullData(response);
       console.log("response from API:", data);
@@ -85,7 +96,7 @@ export default function DashboardScreen() {
     if (data) {
       setDataTemp(data.temperature);
       setDataHumidity(data.humidity);
-      setDataSoilMoisture(data.soil_moisture);
+      // setDataSoilMoisture(data.soil_moisture);
       setDataLight(data.light);
     }
   }, [data]);
@@ -95,13 +106,24 @@ export default function DashboardScreen() {
       console.log("updateData", updateData);
       setDataTemp(updateData.temperature);
       setDataHumidity(updateData.humidity);
-      setDataSoilMoisture(updateData.soil_moisture);
       setDataLight(updateData.light);
     }
   }, [updateData]);
 
-  console.log("dataTemp", dataTemp);
-  console.log("testData", testData);
+  const scrollRefTemp = useRef<any>(null);
+  const scrollRefLight = useRef<any>(null);
+  const scrollRefHum = useRef<any>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollRefTemp.current?.scrollTo({ x: 5000, animated: true });
+      scrollRefLight.current?.scrollTo({ x: 5000, animated: true });
+      scrollRefHum.current?.scrollTo({ x: 5000, animated: true });
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [dataTemp, dataLight, dataHumidity]);
+
+
 
   const chartConfig = {
     curved: true,
@@ -110,22 +132,40 @@ export default function DashboardScreen() {
     animationDuration: 1000,
     onDataChangeAnimationDuration: 1000,
     isAnimated: true,
-    hideDataPoints: true,
+    hideDataPoints: false, // Show data points for better interaction
+    dataPointsColor: "#FF9500",
+    dataPointsRadius: 4,
     startOpacity: 0.8,
     endOpacity: 0.3,
-    xAxisLabelTextStyle: { fontSize: 12 },
+    xAxisLabelTextStyle: { fontSize: 10, color: "#666" },
     thickness: 3,
-    initialSpacing: 1,
-    endSpacing: 0,
-    yAxisLabelWidth: 30,
-    yAxisTextStyle: { fontSize: 12 },
+    initialSpacing: 30,
+    endSpacing: 30,
+    yAxisLabelWidth: 65,
+    yAxisTextStyle: { fontSize: 10, color: "#666" },
     yAxisOffset: 0,
-    noOfSections: 3,
-    hideRules: true,
-    maxValue: 50,
-    width: screenWidth - 96,
-    adjustToWidth: true,
-    height: 100,
+    noOfSections: 4,
+    hideRules: false,
+    rulesColor: "#F0F0F0",
+    rulesType: "dashed",
+    dashGap: 5,
+    dashWidth: 2,
+    width: screenWidth - 110,
+    spacing: 120, // Increased spacing to ensure scrollbar/slider is needed
+    showScrollIndicator: false,
+    indicatorColor: "#FF9500",
+    height: 130,
+    xAxisColor: "#FF9500",
+    xAxisThickness: 2,
+    yAxisColor: "#FF9500",
+    yAxisThickness: 1,
+    pointerEvents: "auto",
+  };
+
+  const calculateMaxScroll = (dataLength: number) => {
+    const totalWidth = dataLength * 120 + 60; // data * spacing + initial + end
+    const visibleWidth = screenWidth - 110;
+    return Math.max(10, totalWidth - visibleWidth); // Minimum 10 to ensure draggable
   };
 
   return (
@@ -159,9 +199,23 @@ export default function DashboardScreen() {
           <LineChart
             data={dataTemp.length ? dataTemp : testData}
             {...chartConfig}
+            maxValue={50}
             color="#FF3B30"
             startFillColor="rgba(255, 59, 48, 0.7)"
             endFillColor="rgba(255, 240, 240, 0.43)"
+            yAxisLabelSuffix="°C"
+            scrollRef={scrollRefTemp}
+          />
+          <Slider
+            style={{ width: "100%", height: 40 }}
+            minimumValue={0}
+            maximumValue={calculateMaxScroll(dataTemp.length || 7)}
+            minimumTrackTintColor="#FF9500"
+            maximumTrackTintColor="#D3D3D3"
+            thumbTintColor="#FF9500"
+            onValueChange={(value) => {
+              scrollRefTemp.current?.scrollTo({ x: value, animated: false });
+            }}
           />
         </View>
         <View style={styles.chartContainer}>
@@ -172,9 +226,23 @@ export default function DashboardScreen() {
           <LineChart
             data={dataLight.length ? dataLight : testData}
             {...chartConfig}
+            maxValue={800}
             color="#FFCC00"
             startFillColor="rgba(229, 199, 0, 0.7)"
             endFillColor="rgba(255, 240, 240, 0.43)"
+            yAxisLabelSuffix=" lx"
+            scrollRef={scrollRefLight}
+          />
+          <Slider
+            style={{ width: "100%", height: 40 }}
+            minimumValue={0}
+            maximumValue={calculateMaxScroll(dataLight.length || 7)}
+            minimumTrackTintColor="#FF9500"
+            maximumTrackTintColor="#D3D3D3"
+            thumbTintColor="#FF9500"
+            onValueChange={(value) => {
+              scrollRefLight.current?.scrollTo({ x: value, animated: false });
+            }}
           />
         </View>
         <View style={styles.chartContainer}>
@@ -185,9 +253,23 @@ export default function DashboardScreen() {
           <LineChart
             data={dataHumidity.length ? dataHumidity : testData}
             {...chartConfig}
+            maxValue={100}
             color="#007AFF"
             startFillColor="rgba(0, 122, 255, 0.7)"
             endFillColor="rgba(240, 248, 255, 0.43)"
+            yAxisLabelSuffix="%"
+            scrollRef={scrollRefHum}
+          />
+          <Slider
+            style={{ width: "100%", height: 40 }}
+            minimumValue={0}
+            maximumValue={calculateMaxScroll(dataHumidity.length || 7)}
+            minimumTrackTintColor="#FF9500"
+            maximumTrackTintColor="#D3D3D3"
+            thumbTintColor="#FF9500"
+            onValueChange={(value) => {
+              scrollRefHum.current?.scrollTo({ x: value, animated: false });
+            }}
           />
         </View>
       </ScrollView>
@@ -313,10 +395,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 16,
     marginBottom: 16,
-    height: 200,
+    height: 250,
     width: "100%",
-    gap: 16,
-    paddingHorizontal: 8,
+    gap: 8,
+    paddingHorizontal: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 3,
   },
   chartHeader: {
     display: "flex",
@@ -395,6 +482,7 @@ const styles = StyleSheet.create({
 });
 
 const replaceNullData = (data: any) => {
+  if (!data || typeof data !== 'object') return {};
   const filled: any = {};
   for (const key in data) {
     if (Array.isArray(data[key])) {

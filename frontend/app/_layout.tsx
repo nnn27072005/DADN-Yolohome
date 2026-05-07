@@ -48,13 +48,9 @@ function AppLayout() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <SafeAreaProvider>
-          {isAuthenticated ? (
-            <WebSocketProvider>
-              <NotificationProvider>{AppStack}</NotificationProvider>
-            </WebSocketProvider>
-          ) : (
-            AppStack
-          )}
+          <WebSocketProvider>
+            <NotificationProvider>{AppStack}</NotificationProvider>
+          </WebSocketProvider>
           <StatusBar style="auto" />
         </SafeAreaProvider>
       </ThemeProvider>
