@@ -2,6 +2,7 @@ const notificationRepository = require("../repository/NotificationRepository");
 const reminderRepository = require("../repository/reminderRepository");
 const settingsRepository = require("../repository/settingsRepository");
 const { publishToFeed } = require("./mqttpublisher");
+const { broadcast } = require("./webSocketService");
 
 class NotificationService {
   async createNotification(userId, message, type, related_entity_id = "") {
@@ -16,10 +17,40 @@ class NotificationService {
         false,
         related_entity_id
       );
+
+      // Broadcast real-time
+      broadcast({
+        type: type,
+        payload: {
+          userId: userId,
+          message: message,
+          index: related_entity_id,
+        },
+      });
+
       return notification;
     } catch (error) {
       console.error("Error in NotificationService.createNotification:", error);
       throw new Error(`Failed to create notification: ${error.message}`);
+    }
+  }
+
+  async createNotificationForAllUsers(message, type, related_entity_id = "") {
+    if (!message || !type) {
+      throw new Error("Missing required parameters for creating notification");
+    }
+    try {
+      const { pool } = require("../database/PostgreDatabase");
+      const usersResult = await pool.query("SELECT id FROM users");
+      const userIds = usersResult.rows.map((row) => row.id);
+
+      const promises = userIds.map((userId) =>
+        this.createNotification(userId, message, type, related_entity_id)
+      );
+      await Promise.all(promises);
+      console.log(`[NotificationService] Created notification for ${userIds.length} users.`);
+    } catch (error) {
+      console.error("Error in NotificationService.createNotificationForAllUsers:", error);
     }
   }
 
@@ -106,7 +137,6 @@ class NotificationService {
       const mappedSensorData = {
         temperature: latestSensorData.thermal,
         humidity: latestSensorData.humid,
-        soil_moisture: latestSensorData["earth-humid"],
         light: latestSensorData.light,
         thermal: latestSensorData.thermal, // Unified mapping for thermal
       };
@@ -170,7 +200,7 @@ class NotificationService {
                   let autoActionMessage = "";
 
                   // If intensity reduction is too much or device doesn't support it well, turn OFF
-                  if (newIntensity < 10 || ["fan", "pump"].includes(deviceName) || deviceName === "led") {
+                  if (newIntensity < 10 || ["fan"].includes(deviceName) || deviceName === "led") {
                     await settingsRepository.updateSettingByName(deviceName, { status: false });
                     autoActionMessage = `Thiết bị '${deviceName === "fan" ? "Quạt" : deviceName === "led" ? "Đèn RGB" : "Bơm"}' đã tự động TẮT sau 1 phút vượt ngưỡng liên tục.`;
                   } else {
@@ -218,9 +248,11 @@ class NotificationService {
             await reminderRepository.updateReminderLastTriggered(reminder.id);
           }
         } else {
-          // No violation -> reset the timer
+          // No violation -> reset the timer and last_triggered_at
           if (reminder.last_violation_start) {
             await reminderRepository.resetViolationStart(reminder.id);
+            // Also reset last_triggered_at so it can trigger immediately on the NEXT violation
+            await reminderRepository.resetReminderLastTriggered(reminder.id);
           }
         }
       }

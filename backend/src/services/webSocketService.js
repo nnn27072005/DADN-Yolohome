@@ -51,8 +51,9 @@ function broadcast(data) {
     message: generateMessageFromPayload(data),
     type: data.type,
     is_read: false, // mặc định là unread
-    related_entity_id: data.payload?.name || data.payload?.index || "",
+    related_entity_id: data.payload?.name || data.payload?.index || data.payload?.feed || "",
     timestamp: new Date().toISOString(),
+    payload: data.payload || null,
   };
 
   const message = JSON.stringify(formattedMessage);
@@ -81,6 +82,8 @@ function generateMessageFromPayload(data) {
       return data.payload.message || "Reminder alert triggered";
     case "SENSOR_ALERT":
       return `Sensor ${data.payload.index} alert: ${data.payload.message}`;
+    case "MQTT_MESSAGE":
+      return `Feed ${data.payload.feed} updated to ${data.payload.value}`;
     default:
       return "System notification";
   }

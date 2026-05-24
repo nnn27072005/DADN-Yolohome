@@ -131,6 +131,16 @@ class ReminderModel {
     `;
     return pool.query(query, [id]);
   }
+
+  async resetReminderLastTriggered(id) {
+    const query = `
+        UPDATE reminders
+        SET last_triggered_at = NULL, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $1
+        RETURNING *;
+    `;
+    return pool.query(query, [id]);
+  }
 }
 
 module.exports = new ReminderModel();

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,17 +7,20 @@ import {
   StyleSheet,
   ImageBackground,
   Image,
+  Platform,
 } from "react-native";
 import { router, Link } from "expo-router";
 import { useMutation } from "@tanstack/react-query";
 import { apiCall } from "@/utils/apiCall";
-import { useAuth } from "@/contexts/AuthContext";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function SignupScreen() {
   const [username, setUsername] = useState("");
   const [fullname, setFullname] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const fullnameInputRef = useRef<TextInput>(null);
+  const passwordInputRef = useRef<TextInput>(null);
 
   const handleSignup = () => {
     signup();
@@ -34,12 +37,14 @@ export default function SignupScreen() {
           fullname,
         },
       });
-      console.log("Response", response);
       return response;
     },
     onSuccess: async () => {
-      console.log("Signup success");
+      alert("Đăng ký thành công! Vui lòng đăng nhập.");
       router.replace("/auth/login");
+    },
+    onError: (error) => {
+      alert("Lỗi đăng ký: " + error.message);
     },
   });
 
@@ -50,78 +55,96 @@ export default function SignupScreen() {
       resizeMode="cover"
     >
       <View style={styles.overlay}>
-        <Text style={[styles.title, { color: "#1A1A2E", marginVertical: 40 }]}>
-          Yolo<Text style={{ color: "#FF9500" }}>Home</Text>
-        </Text>
-
-        <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: "#f80404ff" }]}>Tên đăng nhập</Text>
-            <TextInput
-              placeholder=""
-              value={username}
-              onChangeText={setUsername}
-              style={styles.input}
-            />
+        {/* Logo Section */}
+        <View style={styles.logoContainer}>
+          <View style={styles.logoIconBox}>
+            <MaterialCommunityIcons name="transit-connection-variant" size={32} color="#FF9500" />
           </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: "#f80404ff" }]}>Họ và tên</Text>
-            <TextInput
-              placeholder=""
-              value={fullname}
-              onChangeText={setFullname}
-              style={styles.input}
-            />
-          </View>
-
-          <View style={[styles.inputContainer, { position: "relative" }]}>
-            <Text style={[styles.label, { color: "#f80404ff" }]}>Mật khẩu</Text>
-            <TextInput
-              placeholder=""
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              style={[styles.input, { paddingRight: 40 }]}
-              onSubmitEditing={handleSignup}
-              returnKeyType="join"
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={{
-                position: "absolute",
-                right: 16,
-                top: 42,
-              }}
-            >
-              {showPassword ? (
-                <Image
-                  source={require("@/assets/images/show.png")}
-                  style={{
-                    width: 20,
-                    height: 20,
-                  }}
-                />
-              ) : (
-                <Image
-                  source={require("@/assets/images/hide.png")}
-                  style={{ width: 20, height: 20 }}
-                />
-              )}
-            </TouchableOpacity>
-          </View>
+          <Text style={styles.logoTitle}>
+            Yolo<Text style={{ color: "#FF9500" }}>home</Text>
+          </Text>
         </View>
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleSignup}>
-          <Text style={styles.loginButtonText}>Đăng ký</Text>
-        </TouchableOpacity>
+        {/* Simplified Signup Frame */}
+        <View style={styles.card}>
+          <Text style={styles.welcomeText}>Đăng ký</Text>
 
-        <Text style={styles.footerText}>
-          Đã có tài khoản?{" "}
-          <Link href="/auth/login" style={styles.signupLink}>
-            Đăng nhập
-          </Link>
-        </Text>
+          {/* Username Input */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Tên đăng nhập</Text>
+            <View style={styles.inputWrapper}>
+              <MaterialCommunityIcons name="account-outline" size={20} color="#1A1A2E" style={styles.inputIcon} />
+              <TextInput
+                placeholder="Nhập tên đăng nhập"
+                placeholderTextColor="#A0A0B0"
+                value={username}
+                onChangeText={setUsername}
+                style={styles.input}
+                autoCapitalize="none"
+                returnKeyType="next"
+                onSubmitEditing={() => fullnameInputRef.current?.focus()}
+                blurOnSubmit={false}
+              />
+            </View>
+          </View>
+
+          {/* Full Name Input */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Họ và tên</Text>
+            <View style={styles.inputWrapper}>
+              <MaterialCommunityIcons name="badge-account-outline" size={20} color="#1A1A2E" style={styles.inputIcon} />
+              <TextInput
+                ref={fullnameInputRef}
+                placeholder="Nhập họ và tên"
+                placeholderTextColor="#A0A0B0"
+                value={fullname}
+                onChangeText={setFullname}
+                style={styles.input}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordInputRef.current?.focus()}
+                blurOnSubmit={false}
+              />
+            </View>
+          </View>
+
+          {/* Password Input */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.inputLabel}>Mật khẩu</Text>
+            <View style={styles.inputWrapper}>
+              <MaterialCommunityIcons name="lock-outline" size={20} color="#1A1A2E" style={styles.inputIcon} />
+              <TextInput
+                ref={passwordInputRef}
+                placeholder="Nhập mật khẩu"
+                placeholderTextColor="#A0A0B0"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                style={[styles.input, { flex: 1 }]}
+                returnKeyType="done"
+                onSubmitEditing={handleSignup}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <MaterialCommunityIcons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={20}
+                  color="#1A1A2E"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Action Button */}
+          <TouchableOpacity style={styles.primaryButton} onPress={handleSignup}>
+            <Text style={styles.primaryButtonText}>Đăng ký ngay</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.footerLinkText}>
+            Đã có tài khoản?{" "}
+            <Link href="/auth/login" style={styles.signupLink}>
+              Đăng nhập
+            </Link>
+          </Text>
+        </View>
       </View>
     </ImageBackground>
   );
@@ -138,69 +161,101 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
   },
-  title: {
-    fontSize: 36,
+  logoContainer: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  logoIconBox: {
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 149, 0, 0.3)",
+    backgroundColor: "rgba(255, 149, 0, 0.05)",
+    marginBottom: 10,
+  },
+  logoTitle: {
+    fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 40,
-    textShadowColor: "rgba(0, 0, 0, 0.1)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    color: "#1A1A2E",
+    letterSpacing: 1,
   },
-  green: {
-    color: "#228B22",
+  card: {
+    width: "100%",
+    maxWidth: 360,
+    backgroundColor: "rgba(26, 26, 46, 0.95)",
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    marginBottom: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 15,
+      },
+      android: {
+        elevation: 10,
+      },
+    }),
   },
-  orange: {
-    color: "#FF8C00",
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    marginBottom: 24,
+    textAlign: "center",
   },
-  form: {
-    width: "75%",
-    gap: 10,
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#A0A0B0",
+    marginBottom: 8,
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 48,
+  },
+  inputIcon: {
+    marginRight: 10,
   },
   input: {
-    backgroundColor: "white",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
+    flex: 1,
+    color: "#1A1A2E",
     fontSize: 14,
-    elevation: 2,
-  },
-  inputContainer: {
-    gap: 12,
-  },
-
-  label: {
-    paddingLeft: 4,
     fontWeight: "500",
-    fontSize: 14,
-    color: "#555",
   },
-  eyeIcon: {
-    position: "absolute",
-    right: 12,
-    top: 12,
-  },
-  loginButton: {
+  primaryButton: {
     backgroundColor: "#FF8C00",
-    paddingVertical: 12,
-    width: "75%",
+    borderRadius: 10,
+    height: 52,
     alignItems: "center",
-    borderRadius: 30,
-    marginTop: 24,
-    elevation: 3,
+    justifyContent: "center",
+    marginTop: 8,
+    marginBottom: 20,
   },
-  loginButtonText: {
-    color: "#fff",
-    fontWeight: 500,
-    fontSize: 18,
+  primaryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "bold",
   },
-  footerText: {
-    marginTop: 16,
+  footerLinkText: {
     fontSize: 14,
-    color: "#333",
+    color: "#A0A0B0",
+    textAlign: "center",
   },
   signupLink: {
     color: "#FF9500",
-    fontWeight: "600",
+    fontWeight: "bold",
   },
 });

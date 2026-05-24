@@ -140,6 +140,8 @@ const CardReminder: React.FC<ReminderType> = ({
   );
 };
 
+import ScreenBackground from "@/components/ScreenBackground";
+
 export default function ReminderTab() {
   const insets = useSafeAreaInsets();
   const [reminderList, setReminderList] = useState<ReminderType[]>([]);
@@ -193,110 +195,110 @@ export default function ReminderTab() {
   }, [reminders]);
 
   return (
-    <SafeAreaView
-      style={{
-        ...styles.container,
-        paddingTop: insets.top + 20,
-        paddingBottom: insets.bottom + 20,
-      }}
-    >
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Reminders</Text>
-      </View>
-      {isLoading || reminderList.length === 0 ? (
-        <View style={styles.loadingContainer}>
-          <Ionicons name="notifications-off-outline" size={80} color="#ccc" />
-          <Text style={{ fontSize: 24, color: "#888", fontWeight: "600" }}>Chưa có lời nhắc nào</Text>
+    <ScreenBackground variant="main" overlayOpacity={0.15}>
+      <SafeAreaView
+        style={{
+          ...styles.container,
+          paddingTop: insets.top + 20,
+        }}
+      >
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Reminders</Text>
         </View>
-      ) : (
-      <View style={styles.scrollWrapper}>
-        <SwipeListView
-          ref={listViewRef}
-          data={reminderList.filter((r) => ["temperature", "light"].includes(r.index))}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <CardReminder 
-              {...item} 
-              onDelete={(id) => {
-                setDeletingId(id);
-                setIsDeleteModalVisible(true);
-              }} 
-            />
-          )}
-              renderHiddenItem={({ item }) => (
-                <View style={styles.rowBack}>
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => {
-                      setDeletingId(item.id);
-                      setIsDeleteModalVisible(true);
-                    }}
-                  >
-                    <RemoveButton width={44} height={44} />
-                  </TouchableOpacity>
-                </View>
-              )}
-              rightOpenValue={-75}
-              disableRightSwipe
-              contentContainerStyle={styles.reminderList}
-              recalculateHiddenLayout={true}
-            />
+        {isLoading || reminderList.length === 0 ? (
+          <View style={styles.loadingContainer}>
+            <Ionicons name="notifications-off-outline" size={80} color="rgba(255,255,255,0.6)" />
+            <Text style={{ fontSize: 24, color: "rgba(255,255,255,0.8)", fontWeight: "600" }}>Chưa có lời nhắc nào</Text>
           </View>
-      )}
+        ) : (
+        <View style={styles.scrollWrapper}>
+          <SwipeListView
+            ref={listViewRef}
+            data={reminderList.filter((r) => ["temperature", "light"].includes(r.index))}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <CardReminder 
+                {...item} 
+                onDelete={(id) => {
+                  setDeletingId(id);
+                  setIsDeleteModalVisible(true);
+                }} 
+              />
+            )}
+                renderHiddenItem={({ item }) => (
+                  <View style={styles.rowBack}>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => {
+                        setDeletingId(item.id);
+                        setIsDeleteModalVisible(true);
+                      }}
+                    >
+                      <RemoveButton width={44} height={44} />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                rightOpenValue={-75}
+                disableRightSwipe
+                contentContainerStyle={styles.reminderList}
+                recalculateHiddenLayout={true}
+              />
+            </View>
+        )}
 
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={() =>
-          router.push({
-            pathname: "/reminder/setting_reminder",
-          } as const)
-        }
-      >
-        <Text style={{ fontSize: 20, fontWeight: "bold" }}>Thêm</Text>
-        <AddNewButton width={48} height={48} />
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() =>
+            router.push({
+              pathname: "/reminder/setting_reminder",
+            } as const)
+          }
+        >
+          <Text style={{ fontSize: 20, fontWeight: "bold", color: "#fff" }}>Thêm</Text>
+          <AddNewButton width={48} height={48} />
+        </TouchableOpacity>
 
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={isDeleteModalVisible}
-        onRequestClose={() => setIsDeleteModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Xác nhận xoá</Text>
-            <Text style={styles.modalMessage}>Bạn có chắc chắn muốn xoá lời nhắc này không?</Text>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => setIsDeleteModalVisible(false)}
-              >
-                <Text style={styles.modalCancelText}>Huỷ</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalDeleteButton}
-                onPress={() => {
-                  if (deletingId) {
-                    handleDelete.mutate(deletingId);
-                    setIsDeleteModalVisible(false);
-                    setDeletingId(null);
-                  }
-                }}
-              >
-                <Text style={styles.modalDeleteText}>Xoá</Text>
-              </TouchableOpacity>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={isDeleteModalVisible}
+          onRequestClose={() => setIsDeleteModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Xác nhận xoá</Text>
+              <Text style={styles.modalMessage}>Bạn có chắc chắn muốn xoá lời nhắc này không?</Text>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={styles.modalCancelButton}
+                  onPress={() => setIsDeleteModalVisible(false)}
+                >
+                  <Text style={styles.modalCancelText}>Huỷ</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.modalDeleteButton}
+                  onPress={() => {
+                    if (deletingId) {
+                      handleDelete.mutate(deletingId);
+                      setIsDeleteModalVisible(false);
+                      setDeletingId(null);
+                    }
+                  }}
+                >
+                  <Text style={styles.modalDeleteText}>Xoá</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-    </SafeAreaView>
+        </Modal>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F7",
     paddingHorizontal: 20,
     justifyContent: "flex-start",
   },
@@ -307,7 +309,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   scrollWrapper: {
     height: "80%",

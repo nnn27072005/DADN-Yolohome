@@ -21,7 +21,6 @@ import { useAuth } from "@/contexts/AuthContext";
 const deviceNameConst = {
   led: "Đèn RGB",
   fan: "Quạt",
-  pump: "Công tắc USB",
 };
 
 const RadioButtonSection: React.FC<{

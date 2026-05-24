@@ -5,11 +5,6 @@ function publishToFeed(feedKey, payload) {
   const topic = `${process.env.ADAFRUIT_IO_USERNAME}/feeds/${feedKey}`;
   const payloadString = String(payload);
   //validate payload
-  if (feedKey === "water-pump") {
-    if (payload > 100 || payload < 0) {
-      throw new Error("Invalid value for water pump");
-    }
-  }
   if (feedKey === "light-control") {
     if (payload > 1 || payload < 0) {
       throw new Error("Invalid value for light control");
@@ -18,6 +13,11 @@ function publishToFeed(feedKey, payload) {
   if (feedKey === "fan-control") {
     if (payload > 100 || payload < 0) {
       throw new Error("Invalid value for fan");
+    }
+  }
+  if (feedKey === "door-control") {
+    if (payload !== "ON" && payload !== "OFF") {
+      throw new Error("Invalid value for door control (must be ON or OFF)");
     }
   }
   client.publish(topic, payloadString, (error) => {
@@ -30,33 +30,6 @@ function publishToFeed(feedKey, payload) {
   });
 }
 
-
-const createAdafruitWaterPumpData = async (req, res) => {
-  try {
-    const { value } = req.body;
-    console.log(value);
-    //validate value
-    if (value > 100 || value < 0) {
-      return res.status(400).json({ message: "Invalid value for water pump" });
-    }
-    const topic = `justkh29/feeds/water-pump`;
-    const payload = value.toString();
-
-    client.publish(topic, payload, (error) => {
-      if (error) {
-        console.error("Failed to publish to MQTT:", error);
-        res.status(500).json({ error: "Failed to publish to MQTT" });
-      } else {
-        console.log(`Published to ${topic}: ${payload}`);
-        res
-          .status(200)
-          .json({ message: "Water pump command sent via MQTT", value });
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
 const createAdafruitLightControlData = async (req, res) => {
   try {
     const { value } = req.body;
@@ -112,7 +85,6 @@ const createAdafruitFanData = async (req, res) => {
 };
 
 module.exports = {
-  createAdafruitWaterPumpData,
   createAdafruitLightControlData,
   createAdafruitFanData,
   publishToFeed,

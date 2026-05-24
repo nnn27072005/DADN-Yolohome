@@ -60,8 +60,8 @@ class SettingsController {
                   message: `Invalid format for ${fieldName}. Please use HH:MM or HH:MM:SS format.`,
                 });
             }
-            else if (error.message === "Invalid intensity value for pump, fan or led") {
-                return res.status(400).json({ message: "Invalid intensity value for pump, fan or led" });
+            else if (error.message === "Invalid intensity value for fan or led") {
+                return res.status(400).json({ message: "Invalid intensity value for fan or led" });
             }
             res.status(500).json({ message: "Internal Server Error" });
         }
@@ -82,6 +82,17 @@ class SettingsController {
                 return res.status(404).json({ message: "Settings not found" });
             }
             res.status(500).json({ message: "Internal Server Error" });
+        }
+    }
+    async requestDoorAuth(req, res) {
+        try {
+            const { publishToFeed } = require("../services/mqttpublisher");
+            console.log("[DoorAuth] Requesting door authentication by publishing to PIR feed...");
+            publishToFeed("pir", "1");
+            res.json({ message: "Camera verification triggered successfully." });
+        } catch (error) {
+            console.error("Error triggering camera verification:", error);
+            res.status(500).json({ error: "Failed to trigger camera verification" });
         }
     }
 }

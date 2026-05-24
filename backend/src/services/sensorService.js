@@ -1,5 +1,4 @@
 const {
-  getAdafruitEarthHumidData,
   getAdafruitHumidData,
   getAdafruitLightData,
   getAdafruitThermalData,
@@ -26,8 +25,8 @@ const { publishToFeed } = require("./mqttpublisher");
 const notificationService = require("../services/NotificationService");
 
 // dùng cho dashboard, trả về dữ liệu 7 giờ 1 ngày
-const TARGET_HOURS = [8, 9, 12, 15, 18, 20, 23];
-const SENSOR_TYPES = ["thermal", "humid", "earth-humid", "light"];
+const TARGET_HOURS = [0, 4, 8, 12, 16, 20, 24];
+const SENSOR_TYPES = ["thermal", "humid", "light"];
 
 class SensorService {
   async syncFeed(feedKey) {
@@ -44,9 +43,9 @@ class SensorService {
         case "light":
           fetchFeedDataFn = getAdafruitLightData;
           break;
-        case "earth-humid":
-          fetchFeedDataFn = getAdafruitEarthHumidData;
-          break;
+        case "pir":
+          // Skip sync for PIR for now as it's event-driven
+          return [];
         default:
           throw new Error("Invalid feed key");
       }
@@ -86,7 +85,7 @@ class SensorService {
 
   // 06 05 2025
   async getLatestSensorDataForAllFeeds() {
-    const feeds = ["thermal", "humid", "light", "earth-humid"];
+    const feeds = ["thermal", "humid", "light"];
     const latestData = {};
     for (const feed of feeds) {
       const data = await sensorRepository.getLatest(feed);
@@ -106,7 +105,6 @@ class SensorService {
     const keyMapping = {
       thermal: "temperature",
       humid: "humidity",
-      "earth-humid": "soil_moisture",
       light: "light",
     };
 
@@ -119,47 +117,7 @@ class SensorService {
         endTime,
       );
 
-      let processedData = [];
-      if (rawData && rawData.length > 0) {
-        // Sort ascending (oldest → newest) — DB returns DESC
-        rawData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-        // Take the 7 most recent points
-        const recentData = rawData.slice(-7);
-        processedData = recentData.map(item => {
-          let h, m, s;
-          
-          if (item.timestamp instanceof Date) {
-            h = item.timestamp.getUTCHours();
-            m = item.timestamp.getUTCMinutes();
-            s = item.timestamp.getUTCSeconds();
-          } else {
-            const ts = item.timestamp.toString();
-            // Extract HH:mm:ss from strings like "2026-05-07 08:22:40"
-            const match = ts.match(/(\d{2}):(\d{2}):(\d{2})/);
-            if (match) {
-              h = parseInt(match[1]);
-              m = parseInt(match[2]);
-              s = parseInt(match[3]);
-            } else {
-              const d = new Date(ts);
-              h = isNaN(d.getTime()) ? 0 : d.getUTCHours();
-              m = isNaN(d.getTime()) ? 0 : d.getUTCMinutes();
-              s = isNaN(d.getTime()) ? 0 : d.getUTCSeconds();
-            }
-          }
-          
-          // Force +7 shift
-          let vnHour = (h + 7) % 24;
-          const timeLabel = `${String(vnHour).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-
-          return {
-            label: timeLabel,
-            value: Math.round(parseFloat(item.value))
-          };
-        });
-      } else {
-        processedData = [];
-      }
+      const processedData = this.processSensorDataForHours(rawData, TARGET_HOURS);
       const responseKey = keyMapping[sensorType] || sensorType;
       dashboardData[responseKey] = processedData;
     }
@@ -231,6 +189,10 @@ class SensorService {
     }
   }
 
+  async saveSensorData(feedName, value, timestamp = new Date()) {
+    return this.saveSensorDataAndTriggerControl(feedName, value, timestamp);
+  }
+
   // Lưu data từ sensor và kiểm tra dự đoán
   // Được gọi khi MQTT nhận được dữ liệu mới từ các sensor
   async saveSensorDataAndTriggerControl(feedName, value, timestamp) {
@@ -272,8 +234,7 @@ class SensorService {
       // Chuyển latestSensorsArray thành object
       latestSensorObj = latestSensorsArray.reduce((acc, sensor) => {
         let keyName = sensor.name; // Dùng name từ DB (đã map trong model)
-        if (keyName === "soil-moisture") keyName = "earth-humid";
-        else if (keyName === "temperature") keyName = "thermal";
+        if (keyName === "temperature") keyName = "thermal";
         else if (keyName === "humidity") keyName = "humid";
         else if (keyName === "light") keyName = "light";
 
@@ -393,7 +354,8 @@ class SensorService {
 
           // *** CẬP NHẬT VÀ PUBLISH NẾU STATUS HOẶC INTENSITY THAY ĐỔI ***
           const hasStatusChanged = setting.status !== predictedStatus;
-          const hasIntensityChanged = predictedStatus && setting.intensity !== predictedIntensity;
+          const hasIntensityChanged =
+            predictedStatus && setting.intensity !== predictedIntensity;
 
           if (hasStatusChanged || hasIntensityChanged) {
             console.log(
@@ -566,11 +528,21 @@ class SensorService {
       }
     }
   }
+
+  async cleanupOldData() {
+    try {
+      console.log("[Cleanup] Starting old sensor data cleanup (keeping 5 days)...");
+      const deletedCount = await sensorRepository.deleteOldData(5);
+      console.log(`[Cleanup] Completed. Deleted ${deletedCount} records.`);
+    } catch (error) {
+      console.error("[Cleanup] Error during cleanup:", error);
+    }
+  }
 }
 
 const sensorService = new SensorService();
 
-const FEEDS = ["humid", "light", "earth-humid", "thermal"];
+const FEEDS = ["humid", "light", "thermal", "pir"];
 
 function startAutoSync() {
   setInterval(async () => {
@@ -603,8 +575,20 @@ function startControlCheck() {
   }, 20 * 1000);
 }
 
+function startCleanupTask() {
+  console.log("[Cleanup] Starting periodic cleanup checks(Daily)...");
+  // Run immediately on start
+  sensorService.cleanupOldData();
+  // Then run every 24 hours
+  setInterval(async () => {
+    await sensorService.cleanupOldData();
+  }, 24 * 60 * 60 * 1000);
+}
+
 module.exports = {
   sensorService,
+  saveSensorData: (feedName, value, timestamp) => sensorService.saveSensorData(feedName, value, timestamp),
   startAutoSync,
   startControlCheck,
+  startCleanupTask,
 };

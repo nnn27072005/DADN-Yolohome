@@ -11,6 +11,7 @@ interface MessageType {
   timestamp: string;
   type: string;
   user_id: number;
+  payload?: any;
 }
 
 type NotificationContextType = {

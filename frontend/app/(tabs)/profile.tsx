@@ -17,6 +17,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
 
+import ScreenBackground from "@/components/ScreenBackground";
+
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const [isLoggedOut, setIsLoggedOut] = useState(false);
@@ -34,51 +36,51 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={{
-        ...styles.container,
-        paddingTop: insets.top + 60,
-        paddingBottom: insets.bottom,
-      }}
-    >
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Profile</Text>
-      </View>
-      <View style={styles.avatarContainer}>
-          <View style={styles.avatarWrapper}>
-            <Ionicons name="person-circle" size={100} color="#1A1A2E" />
-          </View>
-        <Text style={styles.avatarTitle}>{fullname || username || "Nguyễn Văn A"}</Text>
-      </View>
-      <View style={styles.contentCard}>
-        <View style={styles.contentRow}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-            <Ionicons name="notifications-outline" size={24} color="#555" />
-            <Text style={{ fontSize: 18, color: "#333" }}>Thông báo</Text>
-          </View>
-          <Switch
-            value={isNotification}
-            onValueChange={toggleNotification}
-            trackColor={{ false: "#ccc", true: "#FF9100" }}
-            thumbColor="#fff"
-          />
+    <ScreenBackground variant="main" overlayOpacity={0.15}>
+      <SafeAreaView
+        style={{
+          ...styles.container,
+          paddingTop: insets.top + 60,
+        }}
+      >
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Profile</Text>
         </View>
+        <View style={styles.avatarContainer}>
+            <View style={styles.avatarWrapper}>
+              <Ionicons name="person-circle" size={100} color="#fff" />
+            </View>
+          <Text style={styles.avatarTitle}>{fullname || username || "Nguyễn Văn A"}</Text>
+        </View>
+        <View style={styles.contentCard}>
+          <View style={styles.contentRow}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <Ionicons name="notifications-outline" size={24} color="#555" />
+              <Text style={{ fontSize: 18, color: "#333" }}>Thông báo</Text>
+            </View>
+            <Switch
+              value={isNotification}
+              onValueChange={toggleNotification}
+              trackColor={{ false: "#ccc", true: "#FF9100" }}
+              thumbColor="#fff"
+            />
+          </View>
 
-        <TouchableOpacity style={styles.buttonLogout} onPress={handleLogout}>
-          <Ionicons name="log-out-outline" size={24} color="#E83F25" style={{ marginRight: 8 }} />
-          <Text style={{ color: "#E83F25", fontWeight: "bold", fontSize: 18 }}>
-            Đăng xuất
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+          <TouchableOpacity style={styles.buttonLogout} onPress={handleLogout}>
+            <Ionicons name="log-out-outline" size={24} color="#E83F25" style={{ marginRight: 8 }} />
+            <Text style={{ color: "#E83F25", fontWeight: "bold", fontSize: 18 }}>
+              Đăng xuất
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F7",
     paddingHorizontal: 20,
     gap: 32,
   },
@@ -89,7 +91,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   avatarContainer: {
     flexDirection: "column",
@@ -99,14 +104,17 @@ const styles = StyleSheet.create({
   avatarWrapper: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 10,
     elevation: 5,
   },
   avatarTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#1A1A2E",
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   contentCard: {
     backgroundColor: "#fff",

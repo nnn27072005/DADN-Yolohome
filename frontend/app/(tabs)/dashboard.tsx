@@ -40,13 +40,15 @@ const generateRealtimeTestData = (): Data[] => {
     return {
       label: `${String(d.getHours()).padStart(2, "0")}:${String(
         d.getMinutes()
-      ).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`,
+      ).padStart(2, "0")}`,
       value: 20 + Math.floor(Math.random() * 5),
     };
   });
 };
 
 const testData = generateRealtimeTestData();
+
+import ScreenBackground from "@/components/ScreenBackground";
 
 export default function DashboardScreen() {
   const { width: screenWidth } = useWindowDimensions();
@@ -94,19 +96,18 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     if (data) {
-      setDataTemp(data.temperature);
-      setDataHumidity(data.humidity);
-      // setDataSoilMoisture(data.soil_moisture);
-      setDataLight(data.light);
+      setDataTemp(data.temperature || []);
+      setDataHumidity(data.humidity || []);
+      setDataLight(data.light || []);
     }
   }, [data]);
 
   useEffect(() => {
     if (updateData) {
       console.log("updateData", updateData);
-      setDataTemp(updateData.temperature);
-      setDataHumidity(updateData.humidity);
-      setDataLight(updateData.light);
+      setDataTemp(updateData.temperature || []);
+      setDataHumidity(updateData.humidity || []);
+      setDataLight(updateData.light || []);
     }
   }, [updateData]);
 
@@ -122,8 +123,6 @@ export default function DashboardScreen() {
     }, 1500);
     return () => clearTimeout(timer);
   }, [dataTemp, dataLight, dataHumidity]);
-
-
 
   const chartConfig = {
     curved: true,
@@ -169,179 +168,186 @@ export default function DashboardScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={{
-        ...styles.container,
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom + 100,
-      }}
-    >
-      <ScrollView style={styles.scrollView} scrollEnabled={!openCalendar}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Dashboard</Text>
-        </View>
-        <View style={styles.header}>
-          <View style={styles.dateSelector}>
-            <TouchableOpacity onPress={() => setOpenCalendar(!openCalendar)} style={styles.calendarIcon}>
-              <Ionicons name="calendar-outline" size={24} color="#1A1A1A" />
-            </TouchableOpacity>
-            <Text style={styles.date}>
-              {selectedDate.toISOString().split("T")[0]}
-            </Text>
+    <ScreenBackground variant="tech" overlayOpacity={0.2}>
+      <SafeAreaView
+        style={{
+          ...styles.container,
+          paddingTop: insets.top,
+        }}
+      >
+        <ScrollView 
+          style={styles.scrollView} 
+          scrollEnabled={!openCalendar}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+        >
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Dashboard</Text>
           </View>
-        </View>
-
-        <View style={styles.chartContainer}>
-          <View style={styles.chartHeader}>
-            <Text style={styles.chartTitle}>Nhiệt độ</Text>
-            <Text style={styles.unit}>°C</Text>
-          </View>
-          <LineChart
-            data={dataTemp.length ? dataTemp : testData}
-            {...chartConfig}
-            maxValue={50}
-            color="#FF3B30"
-            startFillColor="rgba(255, 59, 48, 0.7)"
-            endFillColor="rgba(255, 240, 240, 0.43)"
-            yAxisLabelSuffix="°C"
-            scrollRef={scrollRefTemp}
-          />
-          <Slider
-            style={{ width: "100%", height: 40 }}
-            minimumValue={0}
-            maximumValue={calculateMaxScroll(dataTemp.length || 7)}
-            minimumTrackTintColor="#FF9500"
-            maximumTrackTintColor="#D3D3D3"
-            thumbTintColor="#FF9500"
-            onValueChange={(value) => {
-              scrollRefTemp.current?.scrollTo({ x: value, animated: false });
-            }}
-          />
-        </View>
-        <View style={styles.chartContainer}>
-          <View style={styles.chartHeader}>
-            <Text style={styles.chartTitle}>Cường độ ánh sáng</Text>
-            <Text style={styles.unit}>lux</Text>
-          </View>
-          <LineChart
-            data={dataLight.length ? dataLight : testData}
-            {...chartConfig}
-            maxValue={800}
-            color="#FFCC00"
-            startFillColor="rgba(229, 199, 0, 0.7)"
-            endFillColor="rgba(255, 240, 240, 0.43)"
-            yAxisLabelSuffix=" lx"
-            scrollRef={scrollRefLight}
-          />
-          <Slider
-            style={{ width: "100%", height: 40 }}
-            minimumValue={0}
-            maximumValue={calculateMaxScroll(dataLight.length || 7)}
-            minimumTrackTintColor="#FF9500"
-            maximumTrackTintColor="#D3D3D3"
-            thumbTintColor="#FF9500"
-            onValueChange={(value) => {
-              scrollRefLight.current?.scrollTo({ x: value, animated: false });
-            }}
-          />
-        </View>
-        <View style={styles.chartContainer}>
-          <View style={styles.chartHeader}>
-            <Text style={styles.chartTitle}>Độ ẩm</Text>
-            <Text style={styles.unit}>%</Text>
-          </View>
-          <LineChart
-            data={dataHumidity.length ? dataHumidity : testData}
-            {...chartConfig}
-            maxValue={100}
-            color="#007AFF"
-            startFillColor="rgba(0, 122, 255, 0.7)"
-            endFillColor="rgba(240, 248, 255, 0.43)"
-            yAxisLabelSuffix="%"
-            scrollRef={scrollRefHum}
-          />
-          <Slider
-            style={{ width: "100%", height: 40 }}
-            minimumValue={0}
-            maximumValue={calculateMaxScroll(dataHumidity.length || 7)}
-            minimumTrackTintColor="#FF9500"
-            maximumTrackTintColor="#D3D3D3"
-            thumbTintColor="#FF9500"
-            onValueChange={(value) => {
-              scrollRefHum.current?.scrollTo({ x: value, animated: false });
-            }}
-          />
-        </View>
-      </ScrollView>
-      {openCalendar && (
-        <>
-          <TouchableOpacity
-            style={styles.overlay}
-            activeOpacity={1}
-            onPress={() => {
-              setOpenCalendar(false);
-              setTempDate(selectedDate);
-            }}
-          />
-          <View style={styles.calendarContainer}>
-            <Calendar
-              theme={{
-                backgroundColor: "#ffffff",
-                calendarBackground: "#ffffff",
-                textSectionTitleColor: "#b6c1cd",
-                selectedDayBackgroundColor: "#FF9500",
-                selectedDayTextColor: "#ffffff",
-                todayTextColor: "#FF9500",
-                dayTextColor: "#2d4150",
-                textDisabledColor: "#d9e1e8",
-              }}
-              markedDates={{
-                [tempDate.toISOString().split("T")[0]]: { selected: true },
-              }}
-              maxDate={new Date().toISOString().split("T")[0]}
-              onDayPress={(day: { timestamp: number }) => {
-                setTempDate(new Date(day.timestamp));
-              }}
-              disableAllTouchEventsForDisabledDays={true}
-            />
-            <View style={styles.calendarButtons}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => {
-                  setOpenCalendar(false);
-                  setTempDate(selectedDate);
-                }}
-              >
-                <Text style={styles.buttonText}>Cancel</Text>
+          <View style={styles.header}>
+            <View style={styles.dateSelector}>
+              <TouchableOpacity onPress={() => setOpenCalendar(!openCalendar)} style={styles.calendarIcon}>
+                <Ionicons name="calendar-outline" size={24} color="#1A1A1A" />
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.confirmButton}
-                onPress={() => {
-                  setSelectedDate(tempDate);
-                  setOpenCalendar(false);
-                  updateDashboard();
-                }}
-              >
-                <Text style={styles.buttonText}>Confirm</Text>
-              </TouchableOpacity>
+              <Text style={styles.date}>
+                {selectedDate.toLocaleDateString("en-CA")}
+              </Text>
             </View>
           </View>
-        </>
-      )}
-    </SafeAreaView>
+
+          <View style={styles.chartContainer}>
+            <View style={styles.chartHeader}>
+              <Text style={styles.chartTitle}>Nhiệt độ</Text>
+              <Text style={styles.unit}>°C</Text>
+            </View>
+            <LineChart
+              data={dataTemp && dataTemp.length > 0 ? dataTemp : testData}
+              {...chartConfig}
+              maxValue={50}
+              color="#FF3B30"
+              startFillColor="rgba(255, 59, 48, 0.7)"
+              endFillColor="rgba(255, 240, 240, 0.43)"
+              yAxisLabelSuffix="°C"
+              scrollRef={scrollRefTemp}
+            />
+            <Slider
+              style={{ width: "100%", height: 40 }}
+              minimumValue={0}
+              maximumValue={calculateMaxScroll(dataTemp?.length || 7)}
+              minimumTrackTintColor="#FF9500"
+              maximumTrackTintColor="#D3D3D3"
+              thumbTintColor="#FF9500"
+              onValueChange={(value) => {
+                scrollRefTemp.current?.scrollTo({ x: value, animated: false });
+              }}
+            />
+          </View>
+          <View style={styles.chartContainer}>
+            <View style={styles.chartHeader}>
+              <Text style={styles.chartTitle}>Cường độ ánh sáng</Text>
+              <Text style={styles.unit}>lux</Text>
+            </View>
+            <LineChart
+              data={dataLight && dataLight.length > 0 ? dataLight : testData}
+              {...chartConfig}
+              maxValue={800}
+              color="#FFCC00"
+              startFillColor="rgba(229, 199, 0, 0.7)"
+              endFillColor="rgba(255, 240, 240, 0.43)"
+              yAxisLabelSuffix=" lx"
+              scrollRef={scrollRefLight}
+            />
+            <Slider
+              style={{ width: "100%", height: 40 }}
+              minimumValue={0}
+              maximumValue={calculateMaxScroll(dataLight?.length || 7)}
+              minimumTrackTintColor="#FF9500"
+              maximumTrackTintColor="#D3D3D3"
+              thumbTintColor="#FF9500"
+              onValueChange={(value) => {
+                scrollRefLight.current?.scrollTo({ x: value, animated: false });
+              }}
+            />
+          </View>
+          <View style={styles.chartContainer}>
+            <View style={styles.chartHeader}>
+              <Text style={styles.chartTitle}>Độ ẩm</Text>
+              <Text style={styles.unit}>%</Text>
+            </View>
+            <LineChart
+              data={dataHumidity && dataHumidity.length > 0 ? dataHumidity : testData}
+              {...chartConfig}
+              maxValue={100}
+              color="#007AFF"
+              startFillColor="rgba(0, 122, 255, 0.7)"
+              endFillColor="rgba(240, 248, 255, 0.43)"
+              yAxisLabelSuffix="%"
+              scrollRef={scrollRefHum}
+            />
+            <Slider
+              style={{ width: "100%", height: 40 }}
+              minimumValue={0}
+              maximumValue={calculateMaxScroll(dataHumidity?.length || 7)}
+              minimumTrackTintColor="#FF9500"
+              maximumTrackTintColor="#D3D3D3"
+              thumbTintColor="#FF9500"
+              onValueChange={(value) => {
+                scrollRefHum.current?.scrollTo({ x: value, animated: false });
+              }}
+            />
+          </View>
+        </ScrollView>
+        {openCalendar && (
+          <>
+            <TouchableOpacity
+              style={styles.calendarOverlay}
+              activeOpacity={1}
+              onPress={() => {
+                setOpenCalendar(false);
+                setTempDate(selectedDate);
+              }}
+            />
+            <View style={styles.calendarContainer}>
+              <Calendar
+                theme={{
+                  backgroundColor: "#ffffff",
+                  calendarBackground: "#ffffff",
+                  textSectionTitleColor: "#b6c1cd",
+                  selectedDayBackgroundColor: "#FF9500",
+                  selectedDayTextColor: "#ffffff",
+                  todayTextColor: "#FF9500",
+                  dayTextColor: "#2d4150",
+                  textDisabledColor: "#d9e1e8",
+                }}
+                markedDates={{
+                  [tempDate.toLocaleDateString("en-CA")]: { selected: true },
+                }}
+                minDate={(() => {
+                  const d = new Date();
+                  d.setDate(d.getDate() - 4); // 5 days including today: today, yesterday, ..., 4 days ago
+                  return d.toLocaleDateString("en-CA");
+                })()}
+                maxDate={new Date().toLocaleDateString("en-CA")}
+                onDayPress={(day: { timestamp: number }) => {
+                  setTempDate(new Date(day.timestamp));
+                }}
+                disableAllTouchEventsForDisabledDays={true}
+              />
+              <View style={styles.calendarButtons}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setOpenCalendar(false);
+                    setTempDate(selectedDate);
+                  }}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  onPress={() => {
+                    setSelectedDate(tempDate);
+                    setOpenCalendar(false);
+                    updateDashboard();
+                  }}
+                >
+                  <Text style={styles.buttonText}>Confirm</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </>
+        )}
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F7",
   },
   scrollView: {
     paddingHorizontal: 20,
-    gap: 1000,
     flex: 1,
-    flexDirection: "column",
   },
   titleContainer: {
     marginTop: 8,
@@ -350,7 +356,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   header: {
     flexDirection: "row",

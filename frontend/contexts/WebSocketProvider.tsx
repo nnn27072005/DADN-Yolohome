@@ -14,6 +14,7 @@ interface MessageType {
   timestamp: string;
   type: string;
   user_id: number;
+  payload?: any;
 }
 
 interface WebSocketContextType {
@@ -97,7 +98,7 @@ export const WebSocketProvider = ({
       socketRef.current?.close();
       console.log("[WebSocket] Cleanup on unmount");
     };
-  }, []);
+  }, [token]);
 
   return (
     <WebSocketContext.Provider value={{ socket: socketRef.current, messages }}>

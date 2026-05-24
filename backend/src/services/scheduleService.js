@@ -17,7 +17,6 @@ const pool = require("../database/PostgreDatabase").pool;
 const {
   createAdafruitFanData,
   createAdafruitLightControlData,
-  createAdafruitWaterPumpData,
 } = require("../controllers/adafruitController");
 
 
@@ -118,11 +117,6 @@ class ScheduleService {
               break;
             case "light-control":
               result = await createAdafruitLightControlData(
-                parseInt(task.payload, 10)
-              );
-              break;
-            case "water-pump":
-              result = await createAdafruitWaterPumpData(
                 parseInt(task.payload, 10)
               );
               break;

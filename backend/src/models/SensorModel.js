@@ -91,9 +91,7 @@ class SensorModel {
       const result = await pool.query(query);
       return result.rows.map((row, index) => {
         let newName = row.name;
-        if (newName === "earth-humid") {
-          newName = "soil-moisture";
-        } else if (newName === "thermal") {
+        if (newName === "thermal") {
           newName = "temperature";
         } else if (newName === "humid") {
           newName = "humidity";
@@ -109,6 +107,22 @@ class SensorModel {
         "Error getting latest sensor data in SensorModel.js:",
         error
       );
+      throw error;
+    }
+  }
+
+  // xóa dữ liệu cũ hơn N ngày
+  async deleteOldData(days) {
+    const query = `
+      DELETE FROM sensors
+      WHERE timestamp < NOW() - ($1 || ' days')::INTERVAL;
+    `;
+    try {
+      const result = await pool.query(query, [days]);
+      console.log(`Deleted ${result.rowCount} old sensor records older than ${days} days.`);
+      return result.rowCount;
+    } catch (error) {
+      console.error("Error deleting old sensor data:", error);
       throw error;
     }
   }

@@ -28,6 +28,18 @@ class ReminderRepository {
   async getActiveReminders() {
     return reminderModel.getActiveReminders();
   }
+
+  async updateViolationStart(id) {
+    return reminderModel.updateViolationStart(id);
+  }
+
+  async resetViolationStart(id) {
+    return reminderModel.resetViolationStart(id);
+  }
+
+  async resetReminderLastTriggered(id) {
+    return reminderModel.resetReminderLastTriggered(id);
+  }
 }
 
 module.exports = new ReminderRepository();

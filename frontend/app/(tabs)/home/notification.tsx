@@ -25,7 +25,6 @@ const unit = {
 const device = {
   fan: "Quạt",
   led: "Đèn RGB",
-  pump: "Công tắc USB",
 };
 const mode = {
   manual: "Thủ công",

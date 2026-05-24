@@ -34,7 +34,13 @@ function AppLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) return null;
+  if (!loaded) {
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="auto" />
+      </SafeAreaProvider>
+    );
+  }
 
   const AppStack = (
     <Stack>

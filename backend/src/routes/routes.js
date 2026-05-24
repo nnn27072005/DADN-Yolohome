@@ -33,9 +33,7 @@ const {
 const {
   getAdafruitThermalData,
   getAdafruitLightData,
-  getAdafruitEarthHumidData,
   getAdafruitHumidData,
-  getAdafruitWaterPumpData,
   getAdafruitFanData,
   getAdafruitLightControlData,
 } = require("../controllers/adafruitController");
@@ -58,12 +56,6 @@ router.post("/changePassword", authenticateToken, changePassword);
 router.get("/example", authenticateToken, getExampleTable);
 
 router.get("/adafruit/thermal", authenticateToken, getAdafruitThermalData);
-
-router.get(
-  "/adafruit/earth-humid",
-  authenticateToken,
-  getAdafruitEarthHumidData
-);
 
 router.get("/adafruit/humid", authenticateToken, getAdafruitHumidData);
 
@@ -138,6 +130,12 @@ router.put(
   "/settings/:name/status",
   authenticateToken,
   settingsController.updateSettingStatusByName
+);
+
+router.post(
+  "/settings/door/request-auth",
+  authenticateToken,
+  settingsController.requestDoorAuth
 );
 
 // notifications

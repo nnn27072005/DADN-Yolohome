@@ -1,13 +1,19 @@
 {
   "expo": {
     "name": "frontend",
-    "slug": "frontend",
+    "slug": "yolohome",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
+    "updates": {
+      "url": "https://u.expo.dev/5a3bd133-94ec-45fd-80a3-23dff71d5ade"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "ios": {
       "supportsTablet": true
     },
@@ -24,6 +30,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-updates",
       [
         "expo-splash-screen",
         {
@@ -42,7 +49,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "2ff696a9-66b9-41ec-a663-2bf781c8e120"
+        "projectId": "5a3bd133-94ec-45fd-80a3-23dff71d5ade"
       }
     }
   }

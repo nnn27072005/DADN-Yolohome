@@ -103,45 +103,7 @@ const getAdafruitHumidData = async (req, res) => {
   }
 };
 
-const getAdafruitEarthHumidData = async (req, res) => {
-  try {
-    const data = await fetchAdafruitFeedData("earth-humid");
-    if (res) {
-      res.json(data);
-    } else {
-      return data;
-    }
-  } catch (error) {
-    if (res) {
-      const status = error.response?.status || 500;
-      const message =
-        error.response?.data?.error || error.message || "Internal Server Error";
-      res.status(status).json({ error: message });
-    } else {
-      throw error;
-    }
-  }
-};
 
-const getAdafruitWaterPumpData = async (req, res) => {
-  try {
-    const data = await fetchAdafruitFeedData("water-pump");
-    if (res) {
-      res.json(data);
-    } else {
-      return data;
-    }
-  } catch (error) {
-    if (res) {
-      const status = error.response?.status || 500;
-      const message =
-        error.response?.data?.error || error.message || "Internal Server Error";
-      res.status(status).json({ error: message });
-    } else {
-      throw error;
-    }
-  }
-};
 
 const getAdafruitFanData = async (req, res) => {
   try {
@@ -186,9 +148,7 @@ const getAdafruitLightControlData = async (req, res) => {
 module.exports = {
   getAdafruitThermalData,
   getAdafruitLightData,
-  getAdafruitEarthHumidData,
   getAdafruitHumidData,
-  getAdafruitWaterPumpData,
   getAdafruitFanData,
   getAdafruitLightControlData,
 };

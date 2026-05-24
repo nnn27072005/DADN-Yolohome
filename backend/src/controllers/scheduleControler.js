@@ -20,10 +20,10 @@ class ScheduleController {
     }
     // fan và pump: 0-100
     // light-control: 0-1
-    if (feedKey === "fan" || feedKey === "water-pump") {
+    if (feedKey === "fan") {
       if (payload < 0 || payload > 100) {
         return res.status(400).json({
-          message: "Invalid payload for fan or water pump. Must be between 0 and 100.",
+          message: "Invalid payload for fan. Must be between 0 and 100.",
         });
       }
     }

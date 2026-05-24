@@ -9,12 +9,13 @@ const PORT = process.env.PORT || 8000;
 const { pool } = require("./src/database/PostgreDatabase");
 
 const router = require("./src/routes/routes");
-const { startAutoSync, startControlCheck } = require("./src/services/sensorService");
+const { startAutoSync, startControlCheck, startCleanupTask } = require("./src/services/sensorService");
 const { startDeviceAutoSync } = require("./src/services/deviceService");
 const { startScheduler } = require("./src/services/scheduleService");
 const mqttClient = require("./src/utils/mqtt");
 const { getWebSocketInfo, initWebSocketServer } = require("./src/services/webSocketService");
 const notificationService = require("./src/services/NotificationService");
+const aiManagerService = require("./src/services/aiManagerService");
 
 
 
@@ -76,6 +77,10 @@ server.listen(PORT, () => {
   // chạy scheduler
   startScheduler(); // chạy 10s/lần
   startControlCheck();
+  startCleanupTask();
+  
+  // Khởi chạy module AI nhận diện khuôn mặt
+  aiManagerService.start();
 
 
   const REMINDER_CHECK_INTERVAL = 30000; // 30 giây

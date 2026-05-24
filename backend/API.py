@@ -477,13 +477,6 @@ def get_settings():
     "mode": "manual",
     "status": false,
     "intensity": 50
-  },
-  {
-    "id": 3,
-    "name": "pump",
-    "mode": "manual",
-    "status": false,
-    "intensity": 100
   }
 ]
 
@@ -502,13 +495,6 @@ def get_settings():
     "mode": "manual",
     "status": false,
     "intensity": 50
-  },
-  {
-    "id": 3,
-    "name": "pump",
-    "mode": "manual",
-    "status": false,
-    "intensity": 100
   }
 ])
 
@@ -633,14 +619,6 @@ def get_setting(id):
             "turn_on_at": "10:00",
             "turn_off_after": 50,
             "repeat": "today"
-        })
-    elif id == "3":
-        return jsonify({
-            "id": 3,
-            "name": "pump",
-            "mode": "automatic",
-            "status": True,
-            "intensity": 50
         })
     else:
         return jsonify({"error": "Device not found"}), 404

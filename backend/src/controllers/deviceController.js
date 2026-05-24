@@ -2,7 +2,6 @@ const { deviceService } = require("../services/deviceService");
 const {
   createAdafruitLightControlData,
   createAdafruitFanData,
-  createAdafruitWaterPumpData,
 } = require("../services/mqttpublisher");
 require("dotenv").config();
 const mqttClient = require("../utils/mqtt");
@@ -45,8 +44,6 @@ class DeviceController {
           return await createAdafruitFanData(req, res);
         case "light-control":
           return await createAdafruitLightControlData(req, res);
-        case "water-pump":
-          return await createAdafruitWaterPumpData(req, res);
         default:
           return res.status(400).json({ error: "Invalid feed key" });
       }

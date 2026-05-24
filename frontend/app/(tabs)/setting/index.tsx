@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import ScreenBackground from "@/components/ScreenBackground";
 import SettingsIcon from "@/assets/icons/setting-fill-22.svg";
 import {
   View,
@@ -8,6 +9,7 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
+  ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -15,7 +17,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiCall } from "@/utils/apiCall";
 import settingsMockData from "@/data/settings.mock.json";
 import { useAuth } from "@/contexts/AuthContext";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 interface DeviceType {
   name: string;
   mode: string;
@@ -29,15 +31,15 @@ interface DeviceType {
 }
 
 const devicesImage = {
-  led: { name: "bulb", color: "#4CD964" },
-  fan: { name: "sync-outline", color: "#007AFF" },
-  pump: { name: "logo-usb", color: "#5856D6" },
+  led: { lib: Ionicons, name: "bulb", color: "#4CD964" },
+  fan: { lib: MaterialCommunityIcons, name: "fan", color: "#007AFF" },
+  door: { lib: MaterialCommunityIcons, name: "door-closed", color: "#FF9500" },
 };
 
 const deviceName = {
   led: "Đèn RGB",
   fan: "Quạt",
-  pump: "Công tắc USB",
+  door: "Cửa chính",
 };
 
 const modeName = {
@@ -54,6 +56,8 @@ const CardDevice: React.FC<DeviceType> = ({
 }) => {
   const router = useRouter();
   const [updateStatus, setUpdateStatus] = useState(status);
+  const iconConfig = devicesImage[name as keyof typeof devicesImage] || { lib: Ionicons, name: "help-circle", color: "#999" };
+  const IconLib = iconConfig.lib;
 
   const toggleSwitch = () => {
     setUpdateStatus((prev) => !prev);
@@ -86,11 +90,11 @@ const CardDevice: React.FC<DeviceType> = ({
   return (
     <View style={styles.card}>
       <View style={styles.LeftSection}>
-        <View style={[styles.iconContainer, { backgroundColor: (devicesImage[name as keyof typeof devicesImage] as any).color + "20" }]}>
-          <Ionicons 
-            name={(devicesImage[name as keyof typeof devicesImage] as any).name} 
-            size={32} 
-            color={(devicesImage[name as keyof typeof devicesImage] as any).color} 
+        <View style={[styles.iconContainer, { backgroundColor: iconConfig.color + "20" }]}>
+          <IconLib 
+            name={iconConfig.name as any} 
+            size={40} 
+            color={iconConfig.color} 
           />
         </View>
         <View style={styles.info}>
@@ -163,45 +167,51 @@ export default function SettingTab() {
   }, [settings]);
 
   return (
-    <SafeAreaView
-      style={{
-        ...styles.container,
-        paddingTop: insets.top + 20,
-        paddingBottom: insets.bottom + 100,
-      }}
-    >
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Settings</Text>
-      </View>
-      <View style={styles.aiSettingCard}>
-        <View style={styles.aiIconContainer}>
-          <Ionicons name="analytics" size={24} color="#1E88E5" />
-        </View>
-        <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={styles.aiTitle}>Tự động hóa AI</Text>
-          <Text style={styles.aiDesc}>Học thói quen và tối ưu hóa tiêu thụ điện năng thông qua AI.</Text>
-        </View>
-        <Switch
-          value={aiEnabled}
-          onValueChange={setAiEnabled}
-          trackColor={{ false: "#ccc", true: "#1E88E5" }}
-        />
-      </View>
+    <ScreenBackground variant="main" overlayOpacity={0.15}>
+      <SafeAreaView
+        style={{
+          ...styles.container,
+          paddingTop: insets.top + 20,
+        }}
+      >
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 100, gap: 20 }}
+        >
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Settings</Text>
+          </View>
+          <View style={styles.aiSettingCard}>
+            <View style={styles.aiIconContainer}>
+              <Ionicons name="analytics" size={24} color="#1E88E5" />
+            </View>
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <Text style={styles.aiTitle}>Tự động hóa AI</Text>
+              <Text style={styles.aiDesc}>Học thói quen và tối ưu hóa tiêu thụ điện năng thông qua AI.</Text>
+            </View>
+            <Switch
+              value={aiEnabled}
+              onValueChange={setAiEnabled}
+              trackColor={{ false: "#ccc", true: "#1E88E5" }}
+            />
+          </View>
 
-      <Text style={styles.sectionHeader}>Danh sách thiết bị</Text>
+          <Text style={styles.sectionHeader}>Danh sách thiết bị</Text>
 
-      {deviceList && deviceList.filter((device: DeviceType) => ["led", "fan"].includes(device.name)).length > 0 ? (
-        deviceList
-          .filter((device: DeviceType) => ["led", "fan"].includes(device.name))
-          .map((device: DeviceType, index: number) => (
-            <CardDevice key={index} {...device} />
-          ))
-      ) : (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>Đang tải danh sách thiết bị...</Text>
-        </View>
-      )}
-    </SafeAreaView>
+          {deviceList && deviceList.filter((device: DeviceType) => ["led", "fan", "door"].includes(device.name)).length > 0 ? (
+            deviceList
+              .filter((device: DeviceType) => ["led", "fan", "door"].includes(device.name))
+              .map((device: DeviceType, index: number) => (
+                <CardDevice key={index} {...device} />
+              ))
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Đang tải danh sách thiết bị...</Text>
+            </View>
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
@@ -209,7 +219,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    gap: 20,
   },
   titleContainer: {
     alignSelf: "flex-start",
@@ -219,7 +228,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#000",
+    color: "#fff",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   aiSettingCard: {
     flexDirection: "row",

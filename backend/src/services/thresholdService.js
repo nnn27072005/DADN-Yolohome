@@ -3,14 +3,9 @@ const thresholdRepository = require("../repository/thresholdRepository");
 class ThresholdService {
   async getThreshold(feedKey) {
     try {
-      if (
-        feedKey != "thermal" &&
-        feedKey != "humid" &&
-        feedKey != "earth-humid" &&
-        feedKey != "light"
-      ) {
+      if (feedKey != "thermal" && feedKey != "humid" && feedKey != "light") {
         throw new Error(
-          "Invalid feedKey. Must be 'thermal', 'humid', 'earth-humid', or 'light'"
+          "Invalid feedKey. Must be 'thermal', 'humid', or 'light'",
         );
       }
       const res = await thresholdRepository.getThreshold(feedKey);
@@ -23,14 +18,9 @@ class ThresholdService {
   }
   async setThreshold(feedKey, upper, lower) {
     try {
-      if (
-        feedKey != "thermal" &&
-        feedKey != "humid" &&
-        feedKey != "earth-humid" &&
-        feedKey != "light"
-      ) {
+      if (feedKey != "thermal" && feedKey != "humid" && feedKey != "light") {
         throw new Error(
-          "Invalid feedKey. Must be 'thermal', 'humid', 'earth-humi', or 'light'"
+          "Invalid feedKey. Must be 'thermal', 'humid', or 'light'",
         );
       }
 

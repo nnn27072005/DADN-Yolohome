@@ -12,12 +12,5 @@
     "mode": "Thủ công",
     "status": false,
     "intensity": 50
-  },
-  {
-    "id": 3,
-    "name": "pump",
-    "mode": "Thủ công",
-    "status": false,
-    "intensity": 100
   }
 ]

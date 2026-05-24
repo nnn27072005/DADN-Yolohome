@@ -32,6 +32,9 @@ class SensorRepository {
     return SensorModel.getLatestSensorData();
   }
 
+  async deleteOldData(days) {
+    return SensorModel.deleteOldData(days);
+  }
 }
 
 module.exports = new SensorRepository();

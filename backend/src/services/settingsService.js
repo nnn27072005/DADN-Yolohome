@@ -13,7 +13,7 @@ function getFeedKey(deviceName) {
     switch (deviceName) {
         case 'led': return 'light-control';
         case 'fan': return 'fan-control';
-        case 'pump': return 'water-pump';
+        case 'door': return 'door-control';
         default:
             console.error(`Unknown device name: ${deviceName}`);
             return null;
@@ -36,9 +36,8 @@ function determineMQttPayload(deviceName, data) {
                 // intensity: 0-100
                 payload = data.status ? (data.intensity !== undefined ? data.intensity : 100) : 0;
                 break;
-            case 'pump':
-                // intensity: 0-100
-                payload = data.status ? (data.intensity !== undefined ? data.intensity : 100) : 0;
+            case 'door':
+                payload = data.status ? "ON" : "OFF";
                 break;
             default:
                 console.error(`Unknown device name: ${deviceName}`);
@@ -215,7 +214,6 @@ class SettingsService{
                 switch (name) {
                     case 'led': autoSettings.intensity = 1; break;
                     case 'fan':
-                    case 'pump': autoSettings.intensity = 100; break;
                 }
                 // xoá status vì sẽ được model predict
                 delete autoSettings.status;
@@ -242,7 +240,6 @@ class SettingsService{
                   const latestSensors = latestSensorsArray.reduce(
                     (acc, sensor) => {
                       let keyName = sensor.name;
-                      if (keyName === "soil-moisture") keyName = "earth-humid";
                       if (keyName === "temperature") keyName = "thermal";
                       if (keyName === "humidity") keyName = "humid";
 
@@ -314,7 +311,6 @@ class SettingsService{
                       "thermal",
                       "humid",
                       "light",
-                      "earth-humid",
                     ].filter((feed) => !latestSensors[feed]);
                     console.warn(
                       `Cannot predict for device ${name} due to missing sensor data: ${missingFeeds.join(

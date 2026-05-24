@@ -19,10 +19,12 @@ import DashboardIconFocused from "@/assets/icons/dashboard-focus-44.svg";
 import ReminderIconFocused from "@/assets/icons/reminder-focus-44.svg";
 import SettingIconFocused from "@/assets/icons/setting-focus-44.svg";
 import ProfileIconFocused from "@/assets/icons/profile-focus-44.svg";
+import DeviceStatusOverlay from "@/components/DeviceStatusOverlay";
 
 export default function TabLayout() {
   return (
-    <Tabs
+    <>
+      <Tabs
       screenOptions={{
         headerShown: false,
         // tabBarButton: HapticTab,
@@ -117,7 +119,9 @@ export default function TabLayout() {
           href: null,
         }}
       />
-    </Tabs>
+      </Tabs>
+      <DeviceStatusOverlay />
+    </>
   );
 }
 

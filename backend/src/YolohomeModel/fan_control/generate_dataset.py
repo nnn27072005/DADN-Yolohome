@@ -11,7 +11,7 @@ Target:
 
 Logic:
   - ON if temperature > 30°C (nóng)
-  - ON if temperature > 27°C AND humidity > 75% (oi bức)
+  - ON if temperature > 27°C AND humidity > 75%
   - ON if temperature > 28°C during night (22h-5h)
   - Add ~10% noise to make the model learn soft boundaries
 """
@@ -42,9 +42,9 @@ def generate_fan_dataset(n_samples=20000, seed=42):
 
     # Fan ON/OFF logic (realistic Vietnamese home)
     fan_on = (
-        (temperature > 30) |                                         # Nóng → bật quạt
-        ((temperature > 27) & (humidity > 75)) |                     # Oi bức → bật quạt
-        ((temperature > 28) & ((hours >= 22) | (hours <= 5)))        # Đêm nóng → bật quạt
+        (temperature > 30) |                                      
+        ((temperature > 27) & (humidity > 75)) |                    
+        ((temperature > 28) & ((hours >= 22) | (hours <= 5)))      
     ).astype(int)
 
     # Add ~10% noise (flip some labels) to make boundaries softer

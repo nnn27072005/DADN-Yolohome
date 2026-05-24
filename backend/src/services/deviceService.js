@@ -1,7 +1,6 @@
 const {
   getAdafruitFanData,
   getAdafruitLightControlData,
-  getAdafruitWaterPumpData,
 } = require("../controllers/adafruitController");
 const {
   saveDevice,
@@ -19,9 +18,6 @@ class DeviceService {
           break;
         case "light-control":
           fetchFeedDataFn = getAdafruitLightControlData;
-          break;
-        case "water-pump":
-          fetchFeedDataFn = getAdafruitWaterPumpData;
           break;
         default:
           throw new Error("Invalid device key");
@@ -59,7 +55,7 @@ class DeviceService {
 
 const deviceService = new DeviceService();
 
-const DEVICES = ["fan", "light-control", "water-pump"];
+const DEVICES = ["fan", "light-control"];
 function startDeviceAutoSync() {
   setInterval(async () => {
     console.log("Auto-sync started device...");
