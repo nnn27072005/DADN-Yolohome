@@ -16,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { WebSocketProvider } from "@/contexts/WebSocketProvider";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import DeviceStatusOverlay from "@/components/DeviceStatusOverlay";
 
 const queryClient = new QueryClient();
 SplashScreen.preventAutoHideAsync();
@@ -55,7 +56,10 @@ function AppLayout() {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <SafeAreaProvider>
           <WebSocketProvider>
-            <NotificationProvider>{AppStack}</NotificationProvider>
+            <NotificationProvider>
+              {AppStack}
+              <DeviceStatusOverlay />
+            </NotificationProvider>
           </WebSocketProvider>
           <StatusBar style="auto" />
         </SafeAreaProvider>

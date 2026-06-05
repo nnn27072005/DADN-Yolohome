@@ -15,7 +15,7 @@ class LoginModel {
             message: "Login successful",
             userId: user.id,
             username: user.username,
-            fullname: user.fullname,
+            fullname: user.fullname || user.username,
           };
         } else {
           return { status: 401, message: "Incorrect password" };

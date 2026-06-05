@@ -6,7 +6,11 @@ type AuthContextType = {
   username: string | null;
   fullname: string | null;
   isAuthenticated: boolean;
-  setAuthData: (token: string, username: string, fullname: string) => Promise<void>;
+  setAuthData: (
+    token: string,
+    username: string,
+    fullname?: string | null
+  ) => Promise<void>;
   removeToken: () => Promise<void>;
 };
 
@@ -17,13 +21,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [username, setUsernameState] = useState<string | null>(null);
   const [fullname, setFullnameState] = useState<string | null>(null);
 
-  const setAuthData = async (newToken: string, newUsername: string, newFullname: string) => {
+  const setAuthData = async (
+    newToken: string,
+    newUsername: string,
+    newFullname?: string | null
+  ) => {
+    const displayName = newFullname || newUsername;
     await save("token", newToken);
     await save("username", newUsername);
-    await save("fullname", newFullname);
+    await save("fullname", displayName);
     setTokenState(newToken);
     setUsernameState(newUsername);
-    setFullnameState(newFullname);
+    setFullnameState(displayName);
   };
 
   const removeToken = async () => {

@@ -1,4 +1,5 @@
 const client = require("../utils/mqtt");
+const { shouldSkipDuplicatePublish } = require("./deviceCommandGuard");
 require("dotenv").config();
 
 function publishToFeed(feedKey, payload) {
@@ -20,6 +21,12 @@ function publishToFeed(feedKey, payload) {
       throw new Error("Invalid value for door control (must be ON or OFF)");
     }
   }
+  if (shouldSkipDuplicatePublish(feedKey, payloadString)) {
+    console.log(
+      `[MQTT] Skipped duplicate publish to ${topic}: ${payloadString}`
+    );
+    return false;
+  }
   client.publish(topic, payloadString, (error) => {
     if (error) {
       console.error(`Failed to publish to MQTT feed ${feedKey}:`, error);
@@ -28,6 +35,7 @@ function publishToFeed(feedKey, payload) {
       console.log(`Published to ${topic}: ${payloadString}`);
     }
   });
+  return true;
 }
 
 const createAdafruitLightControlData = async (req, res) => {

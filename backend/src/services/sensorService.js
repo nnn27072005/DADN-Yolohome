@@ -22,13 +22,27 @@ const getFeedKey = settingsService.getFeedKey;
 const calculateScheduledStatus = settingsService.calculateScheduledStatus;
 const determineMqttPayloadFromSettings = settingsService.determineMQttPayload;
 const { publishToFeed } = require("./mqttpublisher");
+const {
+  recordAutoCommand,
+  isAutoCommandCoolingDown,
+  isManualCommandCoolingDown,
+} = require("./deviceCommandGuard");
 const notificationService = require("../services/NotificationService");
 
 // dùng cho dashboard, trả về dữ liệu 7 giờ 1 ngày
 const TARGET_HOURS = [0, 4, 8, 12, 16, 20, 24];
 const SENSOR_TYPES = ["thermal", "humid", "light"];
+const AUTO_CONTROL_DEBOUNCE_MS = Number(
+  process.env.AUTO_CONTROL_DEBOUNCE_MS || 3000
+);
 
 class SensorService {
+  constructor() {
+    this.automationTimer = null;
+    this.isAutomationRunning = false;
+    this.hasPendingAutomationRun = false;
+  }
+
   async syncFeed(feedKey) {
     let fetchFeedDataFn;
 
@@ -203,7 +217,7 @@ class SensorService {
         timestamp,
       );
       console.log(`Sensor data saved for ${feedName}:, ${value}`);
-      await this.triggerAutomationControl(feedName, value, timestamp);
+      this.requestAutomationControl(`sensor:${feedName}`);
     } catch (error) {
       console.error(`Error saving sensor data for ${feedName}:`, error);
       // throw error;
@@ -211,13 +225,38 @@ class SensorService {
   }
 
   // Kiểm tra các sensor ở chế độ automatic của tất cả các sensor
-  async triggerAutomationControl() {
+  requestAutomationControl(source = "sensor") {
+    if (this.automationTimer) {
+      clearTimeout(this.automationTimer);
+    }
+
+    this.automationTimer = setTimeout(() => {
+      this.automationTimer = null;
+      this.triggerAutomationControl({ source }).catch((error) => {
+        console.error("[AutoControl] Debounced run failed:", error);
+      });
+    }, AUTO_CONTROL_DEBOUNCE_MS);
+  }
+
+  async triggerAutomationControl(options = {}) {
+    const source = options.source || "periodic";
+
+    if (this.isAutomationRunning) {
+      this.hasPendingAutomationRun = true;
+      console.log(
+        `[AutoControl] Skipping overlapping run from ${source}; pending run marked.`,
+      );
+      return;
+    }
+
+    this.isAutomationRunning = true;
     console.log(
-      `[AutoControl] Checking automatic and scheduled control conditions...`,
+      `[AutoControl] Checking automatic and scheduled control conditions from ${source}...`,
     );
     let allSettings;
     let latestSensorObj = {};
 
+    try {
     try {
       allSettings = await settingsRepository.getAllSettings();
       const latestSensorsArray = await sensorRepository.getLatestSensorData(); // Lấy hết data sensor mới nhất
@@ -254,6 +293,20 @@ class SensorService {
 
       // === Xử lý AUTOMATIC mode ===
       if (setting.mode === "automatic") {
+        if (isManualCommandCoolingDown(deviceName)) {
+          console.log(
+            `[AutoControl ${deviceName}] Skipped because a manual command was sent recently.`,
+          );
+          continue;
+        }
+
+        if (isAutoCommandCoolingDown(deviceName)) {
+          console.log(
+            `[AutoControl ${deviceName}] Skipped because automatic command cooldown is active.`,
+          );
+          continue;
+        }
+
         let relevantInputData = {};
         let canPredict = true;
 
@@ -384,7 +437,10 @@ class SensorService {
               console.log(
                 `[AutoControl ${deviceName}] Publishing to ${feedKey} payload: ${mqttPayload}`,
               );
-              publishToFeed(feedKey, mqttPayload); // Gửi MQTT
+              const published = publishToFeed(feedKey, mqttPayload); // Gửi MQTT
+              if (published) {
+                recordAutoCommand(deviceName);
+              }
 
               // Cập nhật status và intensity mới vào DB
               try {
@@ -525,6 +581,14 @@ class SensorService {
             error,
           );
         }
+      }
+    }
+    } finally {
+      this.isAutomationRunning = false;
+
+      if (this.hasPendingAutomationRun) {
+        this.hasPendingAutomationRun = false;
+        this.requestAutomationControl("pending");
       }
     }
   }

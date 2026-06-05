@@ -23,7 +23,7 @@ const aiManagerService = require("./src/services/aiManagerService");
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
 const corsOptions = {
   origin: "*",

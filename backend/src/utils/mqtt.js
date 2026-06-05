@@ -56,6 +56,25 @@ client.on("message", async (topic, message) => {
       }
     }
 
+    if (feedKey === "door-control") {
+      const normalizedPayload = payload.trim().toUpperCase();
+      if (normalizedPayload === "ON" || normalizedPayload === "OFF") {
+        const settingsRepository = require("../repository/settingsRepository");
+        const updatedDoor = await settingsRepository.updateSettingByName("door", {
+          status: normalizedPayload === "ON",
+        });
+
+        if (updatedDoor) {
+          broadcast({
+            type: "DEVICE_UPDATE",
+            payload: updatedDoor,
+          });
+        }
+      } else {
+        console.warn(`Invalid door-control payload ignored: ${payload}`);
+      }
+    }
+
     // Broadcast update to frontend
     broadcast({
       type: "MQTT_MESSAGE",

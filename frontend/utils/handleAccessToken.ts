@@ -2,17 +2,27 @@ import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 
-export async function save(key: string, value: string | number): Promise<void> {
+export async function save(
+  key: string,
+  value: string | number | null | undefined
+): Promise<void> {
   try {
+    if (value === null || value === undefined) {
+      await removeValueFor(key);
+      return;
+    }
+
+    const stringValue = String(value);
+
     if (Platform.OS === "web") {
       console.log("Web platform");
-      await AsyncStorage.setItem(key, value.toString());
+      await AsyncStorage.setItem(key, stringValue);
     } else {
       console.log("Mobile platform");
-      await SecureStore.setItemAsync(key, value.toString());
+      await SecureStore.setItemAsync(key, stringValue);
     }
   } catch (error) {
-    console.error("Error saving data:", error);
+    console.warn("Error saving data:", error);
   }
 }
 

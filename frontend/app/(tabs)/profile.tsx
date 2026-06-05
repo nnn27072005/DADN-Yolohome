@@ -16,6 +16,7 @@ import { Card, Title } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
+import { shadowStyle, textShadowStyle } from "@/utils/platformStyles";
 
 import ScreenBackground from "@/components/ScreenBackground";
 
@@ -92,9 +93,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     color: "#fff",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    ...textShadowStyle("rgba(0, 0, 0, 0.3)", 0, 1, 2),
   },
   avatarContainer: {
     flexDirection: "column",
@@ -102,30 +101,20 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   avatarWrapper: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
+    ...shadowStyle("#000", 0, 4, 0.2, 10, 5),
   },
   avatarTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    ...textShadowStyle("rgba(0, 0, 0, 0.3)", 0, 1, 2),
   },
   contentCard: {
     backgroundColor: "#fff",
     borderRadius: 20,
     padding: 24,
     gap: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
+    ...shadowStyle("#000", 0, 2, 0.05, 10, 3),
   },
   contentRow: {
     flexDirection: "row",

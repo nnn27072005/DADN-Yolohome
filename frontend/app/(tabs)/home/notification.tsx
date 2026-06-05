@@ -17,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState, useEffect, useLayoutEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNotifications } from "@/contexts/NotificationContext";
+import { shadowStyle } from "@/utils/platformStyles";
 
 const unit = {
   temperature: "°C",
@@ -262,11 +263,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     marginBottom: 12,
     borderLeftWidth: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
+    ...shadowStyle("#000", 0, 4, 0.05, 10, 2),
   },
   cardHeader: {
     flexDirection: "row",
@@ -293,14 +290,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   shadow: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
-    elevation: 5,
+    ...shadowStyle("#000", 0, 10, 0.25, 3.5, 5),
   },
   tabContainer: {
     flexDirection: "row",

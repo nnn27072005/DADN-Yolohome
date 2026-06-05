@@ -17,6 +17,7 @@ import AutomaticSetting from "@/components/setting/AutomaticSetting";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiCall } from "@/utils/apiCall";
 import { useAuth } from "@/contexts/AuthContext";
+import { shadowStyle } from "@/utils/platformStyles";
 
 const deviceNameConst = {
   led: "Đèn RGB",
@@ -273,13 +274,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   shadow: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
-    elevation: 5,
+    ...shadowStyle("#000", 0, 10, 0.25, 3.5, 5),
   },
 });

@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiCall } from "@/utils/apiCall";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { shadowStyle } from "@/utils/platformStyles";
 
 const { width, height } = Dimensions.get("window");
 
@@ -99,7 +100,7 @@ export default function DeviceStatusOverlay() {
   ).current;
 
   // Hide logic moved to render to satisfy Rules of Hooks
-  const isSettingsPage = segments.includes("setting");
+  const isSettingsPage = segments.some((segment) => segment === "setting");
 
   const { data: devices } = useQuery<any[]>({
     queryKey: ["settings"],
@@ -114,14 +115,17 @@ export default function DeviceStatusOverlay() {
   const queryClient = useQueryClient();
 
   const toggleMutation = useMutation({
-    mutationFn: async ({ name, status }: { name: string; status: boolean }) => {
+    mutationFn: async ({ name }: { name: string }) => {
       return apiCall({
         endpoint: `/settings/${name}/status`,
-        method: "PATCH",
+        method: "PUT",
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings"] });
+    },
+    onError: (error) => {
+      console.error("[DeviceStatusOverlay] Failed to toggle device:", error);
     },
   });
 
@@ -171,9 +175,9 @@ export default function DeviceStatusOverlay() {
                       onPress={() =>
                         toggleMutation.mutate({
                           name: device.name,
-                          status: device.status,
                         })
                       }
+                      disabled={toggleMutation.isPending}
                       activeOpacity={0.7}
                     >
                       <DeviceIcon name={device.name} status={device.status} />
@@ -210,11 +214,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF9500",
     justifyContent: "center",
     alignItems: "center",
-    elevation: 10,
-    shadowColor: "#FF9500",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
+    ...shadowStyle("#FF9500", 0, 4, 0.5, 8, 10),
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.3)",
   },
@@ -236,11 +236,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     alignItems: "center",
     gap: 10,
-    elevation: 12,
-    shadowColor: "#FF9500",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
+    ...shadowStyle("#FF9500", 0, 6, 0.6, 12, 12),
     borderWidth: 2,
     borderColor: "rgba(255,255,255,0.4)",
   },

@@ -138,6 +138,12 @@ router.post(
   settingsController.requestDoorAuth
 );
 
+router.post(
+  "/settings/door/verify-frame",
+  authenticateToken,
+  settingsController.verifyDoorFrame
+);
+
 // notifications
 router.get(
   "/notifications",
@@ -185,5 +191,4 @@ router.get("/adafruit/thermal-test", async (req, res) => {
 });
 
 module.exports = { router };
-
 

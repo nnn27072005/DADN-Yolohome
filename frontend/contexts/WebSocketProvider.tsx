@@ -2,9 +2,13 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { AppState, AppStateStatus } from "react-native";
 import Constants from "expo-constants";
 import { useAuth } from "./AuthContext";
-const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const extra =
+  Constants.expoConfig?.extra || (Constants.manifest as any)?.extra || {};
 
-const { websocketUrl } = extra;
+const websocketUrl =
+  (extra.websocketUrl as string | undefined) ||
+  process.env.EXPO_PUBLIC_WEBSOCKET_URL ||
+  "wss://nhunng.ngrok.app";
 
 interface MessageType {
   id: number;

@@ -1,25 +1,31 @@
 """
-Inference script for Fan Control in Yolohome Smart Home.
+Inference script for Fan Control in YoloHome.
 
 Usage:
   python infer_fan_control.py '{"temperature": 32, "humidity": 80}'
 
-Input (JSON):
-  - temperature (°C): Room temperature
-  - humidity (%): Room humidity
+PowerShell:
+  $json = '{\"temperature\": 32, \"humidity\": 80}'
+  python infer_fan_control.py $json
+
+Input JSON:
+  - temperature (C): room air temperature
+  - humidity (%): room relative humidity
 
 Output:
-  Prints "BẬT" (ON) or "TẮT" (OFF) to stdout
+  Prints "BẬT" (ON) or "TẮT" (OFF) to stdout.
 """
+
+import json
+import os
+import sys
+import traceback
 
 import joblib
 import pandas as pd
-import sys
-import json
-import os
-import traceback
 
-sys.stdout.reconfigure(encoding='utf-8')
+
+sys.stdout.reconfigure(encoding="utf-8")
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 models_dir = os.path.join(script_dir, "models")
@@ -44,9 +50,7 @@ try:
         print("Error: Missing input JSON argument.", file=sys.stderr)
         sys.exit(1)
 
-    input_json = sys.argv[1]
-    input_dict = json.loads(input_json)
-
+    input_dict = json.loads(sys.argv[1])
     input_df = pd.DataFrame([input_dict])
 
     for col in column_order:
@@ -58,19 +62,16 @@ try:
                 input_df[col] = pd.to_numeric(input_df[col])
         except ValueError:
             print(
-                f"Error: Could not convert column '{col}' value '{input_df[col].iloc[0]}' to numeric.",
+                f"Error: Could not convert column '{col}' value "
+                f"'{input_df[col].iloc[0]}' to numeric.",
                 file=sys.stderr,
             )
             sys.exit(1)
 
     input_df = input_df[column_order]
-
     input_scaled = scaler.transform(input_df)
+    prediction_result = model.predict(input_scaled)[0]
 
-    prediction = model.predict(input_scaled)
-    prediction_result = prediction[0]
-
-    # Fan model predicts 0 or 1
     output_result = "BẬT" if int(prediction_result) == 1 else "TẮT"
     print(output_result)
 

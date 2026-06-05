@@ -25,6 +25,7 @@ import RemoveButton from "@/assets/images/Remove.svg";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
+import { shadowStyle, textShadowStyle } from "@/utils/platformStyles";
 
 const unit = {
   temperature: "°C",
@@ -310,9 +311,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     color: "#fff",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    ...textShadowStyle("rgba(0, 0, 0, 0.3)", 0, 1, 2),
   },
   scrollWrapper: {
     height: "80%",
@@ -367,11 +366,7 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 4,
     borderRadius: 8,
-    elevation: 100,
-    shadowColor: "#000",
-    shadowOffset: { width: 12, height: 12 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    ...shadowStyle("#000", 12, 12, 0.25, 3.84, 100),
     height: 56,
     width: 56,
     justifyContent: "center",
@@ -437,11 +432,7 @@ const styles = StyleSheet.create({
     width: "85%",
     maxWidth: 400,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 10,
+    ...shadowStyle("#000", 0, 10, 0.25, 20, 10),
   },
   modalTitle: {
     fontSize: 20,

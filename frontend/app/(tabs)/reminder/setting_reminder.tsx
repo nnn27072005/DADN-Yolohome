@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RadioButtonGroup, RadioButtonItem } from "expo-radio-button";
 import { apiCall } from "@/utils/apiCall";
 import { useMutation } from "@tanstack/react-query";
+import { shadowStyle } from "@/utils/platformStyles";
 
 const unit = {
   temperature: "°C",
@@ -441,14 +442,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   shadow: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
-    elevation: 5,
+    ...shadowStyle("#000", 0, 10, 0.25, 3.5, 5),
   },
   input: {
     width: 40,

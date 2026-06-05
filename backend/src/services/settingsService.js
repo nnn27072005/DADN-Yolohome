@@ -6,6 +6,7 @@ const sensorRepository = require('../repository/sensorRepository');
 const settingsmodel = require('../models/settingsModel');
 const { broadcast } = require("./webSocketService");
 const notificationService = require("./NotificationService");
+const { recordManualCommand } = require("./deviceCommandGuard");
 
 
 // map device name với feed key
@@ -477,6 +478,16 @@ class SettingsService{
                           // Không throw lỗi ở đây để không ảnh hưởng luồng chính
                         }
                       }
+            if (
+              finalUpdatedSettings &&
+              userId &&
+              (settingsData.hasOwnProperty("status") ||
+                settingsData.hasOwnProperty("intensity") ||
+                settingsData.hasOwnProperty("mode"))
+            ) {
+              recordManualCommand(name);
+            }
+
             return finalUpdatedSettings;
         }
         catch (error) {
@@ -513,8 +524,11 @@ class SettingsService{
             }
             publishToFeed(feedKey, payload);
       }
-      if (updatedSettings) {
+        if (updatedSettings) {
         broadcast({ type: "DEVICE_UPDATE", payload: updatedSettings });
+      }
+      if (userId) {
+        recordManualCommand(name);
       }
                   if (updatedSettings && userId) {
                     // Kiểm tra có kết quả và userId

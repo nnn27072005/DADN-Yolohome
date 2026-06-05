@@ -8,8 +8,12 @@ interface ApiCallParams {
   body?: any;
 }
 
-const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
-const { apiUrl } = extra;
+const extra =
+  Constants.expoConfig?.extra || (Constants.manifest as any)?.extra || {};
+const apiUrl =
+  (extra.apiUrl as string | undefined) ||
+  process.env.EXPO_PUBLIC_API_URL ||
+  "https://nhunng.ngrok.app/api";
 
 export const apiCall = async ({
   endpoint,

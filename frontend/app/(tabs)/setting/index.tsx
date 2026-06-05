@@ -18,6 +18,7 @@ import { apiCall } from "@/utils/apiCall";
 import settingsMockData from "@/data/settings.mock.json";
 import { useAuth } from "@/contexts/AuthContext";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { shadowStyle, textShadowStyle } from "@/utils/platformStyles";
 interface DeviceType {
   name: string;
   mode: string;
@@ -229,9 +230,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     color: "#fff",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    ...textShadowStyle("rgba(0, 0, 0, 0.3)", 0, 1, 2),
   },
   aiSettingCard: {
     flexDirection: "row",
@@ -240,12 +239,8 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: "space-between",
     alignItems: "center",
-    elevation: 4,
     width: "100%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    ...shadowStyle("#000", 0, 2, 0.1, 8, 4),
   },
   aiIconContainer: {
     width: 44,
@@ -280,14 +275,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     justifyContent: "space-between",
-    elevation: 4,
     height: 140,
     width: "100%",
     gap: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    ...shadowStyle("#000", 0, 2, 0.1, 8, 4),
   },
   iconContainer: {
     width: 82,
@@ -336,11 +327,7 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 6,
     borderRadius: 10,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    ...shadowStyle("#000", 0, 2, 0.2, 4, 2),
     height: 36,
     width: 36,
     justifyContent: "center",

@@ -18,6 +18,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiCall } from "@/utils/apiCall";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { shadowStyle, textShadowStyle } from "@/utils/platformStyles";
 
 
 
@@ -152,13 +153,12 @@ export default function DashboardScreen() {
     width: screenWidth - 110,
     spacing: 120, // Increased spacing to ensure scrollbar/slider is needed
     showScrollIndicator: false,
-    indicatorColor: "#FF9500",
+    indicatorColor: "default" as const,
     height: 130,
     xAxisColor: "#FF9500",
     xAxisThickness: 2,
     yAxisColor: "#FF9500",
     yAxisThickness: 1,
-    pointerEvents: "auto",
   };
 
   const calculateMaxScroll = (dataLength: number) => {
@@ -357,9 +357,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "bold",
     color: "#fff",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    ...textShadowStyle("rgba(0, 0, 0, 0.3)", 0, 1, 2),
   },
   header: {
     flexDirection: "row",
@@ -374,11 +372,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 12,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    ...shadowStyle("#000", 0, 1, 0.1, 4, 2),
     gap: 12,
   },
   calendarIcon: {
@@ -408,11 +402,7 @@ const styles = StyleSheet.create({
     width: "100%",
     gap: 8,
     paddingHorizontal: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 3,
+    ...shadowStyle("#000", 0, 4, 0.1, 12, 3),
   },
   chartHeader: {
     display: "flex",
@@ -446,6 +436,15 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     zIndex: 1000,
   },
+  calendarOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+    zIndex: 1000,
+  },
   calendarContainer: {
     backgroundColor: "#fff",
     borderRadius: 20,
@@ -455,14 +454,7 @@ const styles = StyleSheet.create({
     top: "30%",
     left: "5%",
     zIndex: 1001,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...shadowStyle("#000", 0, 2, 0.25, 3.84, 5),
   },
   calendarButtons: {
     flexDirection: "row",

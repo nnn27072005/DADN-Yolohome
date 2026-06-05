@@ -19,12 +19,11 @@ import DashboardIconFocused from "@/assets/icons/dashboard-focus-44.svg";
 import ReminderIconFocused from "@/assets/icons/reminder-focus-44.svg";
 import SettingIconFocused from "@/assets/icons/setting-focus-44.svg";
 import ProfileIconFocused from "@/assets/icons/profile-focus-44.svg";
-import DeviceStatusOverlay from "@/components/DeviceStatusOverlay";
+import { shadowStyle } from "@/utils/platformStyles";
 
 export default function TabLayout() {
   return (
-    <>
-      <Tabs
+    <Tabs
       screenOptions={{
         headerShown: false,
         // tabBarButton: HapticTab,
@@ -119,22 +118,13 @@ export default function TabLayout() {
           href: null,
         }}
       />
-      </Tabs>
-      <DeviceStatusOverlay />
-    </>
+    </Tabs>
   );
 }
 
 const styles = StyleSheet.create({
   shadow: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
-    elevation: 5,
+    ...shadowStyle("#000", 0, 10, 0.25, 3.5, 5),
   },
   focusedIcon: {
     width: 44,

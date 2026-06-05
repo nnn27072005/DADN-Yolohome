@@ -40,6 +40,11 @@ export default function LoginScreen() {
       return response;
     },
     onSuccess: async (data) => {
+      if (!data?.token || !data?.username) {
+        alert(data?.message || "Đăng nhập thất bại");
+        return;
+      }
+
       await setAuthData(data.token, data.username, data.fullname);
       router.replace("/(tabs)");
     },
@@ -189,6 +194,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.1)",
     ...Platform.select({
+      web: {
+        boxShadow: "0px 10px 15px rgba(0, 0, 0, 0.3)",
+      },
       ios: {
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 10 },

@@ -1,5 +1,26 @@
 const settingsService = require('../services/settingsService');
 
+const DOOR_AUTO_CLOSE_MS = Number(
+    process.env.DOOR_AUTO_CLOSE_MS || 5 * 60 * 1000
+);
+let doorAutoCloseTimer = null;
+
+function scheduleDoorAutoClose() {
+    if (doorAutoCloseTimer) {
+        clearTimeout(doorAutoCloseTimer);
+    }
+
+    doorAutoCloseTimer = setTimeout(async () => {
+        doorAutoCloseTimer = null;
+        try {
+            console.log(`[DoorAuth] Auto-closing door after ${DOOR_AUTO_CLOSE_MS}ms...`);
+            await settingsService.updateSettingByName("door", { status: false }, null);
+        } catch (error) {
+            console.error("[DoorAuth] Failed to auto-close door:", error);
+        }
+    }, DOOR_AUTO_CLOSE_MS);
+}
+
 class SettingsController {
     async getAllSettings(req, res) {
         try {
@@ -93,6 +114,42 @@ class SettingsController {
         } catch (error) {
             console.error("Error triggering camera verification:", error);
             res.status(500).json({ error: "Failed to trigger camera verification" });
+        }
+    }
+
+    async verifyDoorFrame(req, res) {
+        try {
+            const { imageBase64 } = req.body;
+            if (!imageBase64) {
+                return res.status(400).json({ error: "imageBase64 is required" });
+            }
+
+            const { classifyBase64Image } = require("../services/faceRecognitionService");
+            const { publishToFeed } = require("../services/mqttpublisher");
+            const { broadcast } = require("../services/webSocketService");
+
+            const result = await classifyBase64Image(imageBase64);
+            const resultIndex = Number(result.resultIndex);
+
+            publishToFeed("ai-result", resultIndex);
+
+            if (resultIndex === 0) {
+                publishToFeed("door-control", "ON");
+                await settingsService.updateSettingByName("door", { status: true }, req.user?.id);
+                scheduleDoorAutoClose();
+            } else if (resultIndex === 1) {
+                publishToFeed("door-control", "OFF");
+            }
+
+            broadcast({
+                type: "MQTT_MESSAGE",
+                payload: { feed: "ai-result", value: String(resultIndex) },
+            });
+
+            res.json(result);
+        } catch (error) {
+            console.error("[DoorAuth] Error verifying frame:", error);
+            res.status(500).json({ error: "Failed to verify camera frame", details: error.message });
         }
     }
 }
