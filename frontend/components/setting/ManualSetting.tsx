@@ -11,7 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { RadioButtonGroup, RadioButtonItem } from "expo-radio-button";
 import { apiCall } from "@/utils/apiCall";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
 interface Props {
@@ -58,7 +58,7 @@ const RadioButtonSection: React.FC<Props> = ({
         <RadioButtonItem
           value="custom"
           label={
-            <>
+            <View style={styles.inlineOption}>
               <TextInput
                 onChangeText={handleChangeTimeValue}
                 value={time?.toString() || ""}
@@ -76,7 +76,7 @@ const RadioButtonSection: React.FC<Props> = ({
                 }}
               />
               <Text style={{ fontSize: 14 }}>Phút</Text>
-            </>
+            </View>
           }
         />
       </RadioButtonGroup>
@@ -243,6 +243,10 @@ const styles = StyleSheet.create({
   radioButtonSection: {
     paddingHorizontal: 20,
     gap: 8,
+  },
+  inlineOption: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
 

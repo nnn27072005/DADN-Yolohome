@@ -2,19 +2,17 @@
 Inference script for LED Control in YoloHome.
 
 Usage:
-  python infer_led_control.py '{"Temperature": 22, "Humidity": 40, "Minute_Of_Day": 720}'
+  python infer_led_control.py '{"Light_Intensity": 80, "Temperature": 25, "PIR": 1, "Minute_Of_Day": 720}'
 
 PowerShell:
-  $json = '{\"Temperature\": 22, \"Humidity\": 40, \"Minute_Of_Day\": 720}'
+  $json = '{\"Light_Intensity\": 80, \"Temperature\": 25, \"PIR\": 1, \"Minute_Of_Day\": 720}'
   python infer_led_control.py $json
 
 Input JSON:
+  - Light_Intensity (lux): ambient room light level
   - Temperature (C): room temperature
-  - Humidity (%): room relative humidity
+  - PIR (0/1): latest motion signal, or 0 if unavailable
   - Minute_Of_Day (0-1439): current time as minutes since midnight
-
-Extra fields such as Light_Intensity are allowed and ignored unless the trained
-model column_order requires them.
 
 Output:
   Prints 1 (ON) or 0 (OFF) to stdout.

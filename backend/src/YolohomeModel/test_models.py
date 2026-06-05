@@ -16,10 +16,10 @@ tests = [
     ("Fan ON (very hot)", fan_dir, "infer_fan_control.py", '{"temperature": 35, "humidity": 60}'),
     ("Fan OFF (mild)", fan_dir, "infer_fan_control.py", '{"temperature": 26, "humidity": 55}'),
     # LED tests
-    ("LED ON (dark daytime)", led_dir, "infer_led_control.py", '{"Light_Intensity": 50, "Temperature": 28, "Humidity": 75, "Minute_Of_Day": 720}'),
-    ("LED OFF (bright daytime)", led_dir, "infer_led_control.py", '{"Light_Intensity": 400, "Temperature": 28, "Humidity": 75, "Minute_Of_Day": 720}'),
-    ("LED ON (evening dark)", led_dir, "infer_led_control.py", '{"Light_Intensity": 20, "Temperature": 28, "Humidity": 75, "Minute_Of_Day": 1200}'),
-    ("LED OFF (deep night)", led_dir, "infer_led_control.py", '{"Light_Intensity": 5, "Temperature": 28, "Humidity": 75, "Minute_Of_Day": 120}'),
+    ("LED ON (dark occupied)", led_dir, "infer_led_control.py", '{"Light_Intensity": 50, "Temperature": 25, "PIR": 1, "Minute_Of_Day": 720}'),
+    ("LED OFF (bright occupied)", led_dir, "infer_led_control.py", '{"Light_Intensity": 180, "Temperature": 25, "PIR": 1, "Minute_Of_Day": 720}'),
+    ("LED ON (evening dark)", led_dir, "infer_led_control.py", '{"Light_Intensity": 20, "Temperature": 25, "PIR": 1, "Minute_Of_Day": 1200}'),
+    ("LED OFF (deep night)", led_dir, "infer_led_control.py", '{"Light_Intensity": 5, "Temperature": 25, "PIR": 1, "Minute_Of_Day": 120}'),
 ]
 
 print("=" * 60)

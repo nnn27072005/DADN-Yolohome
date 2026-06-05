@@ -14,7 +14,7 @@ PIR_TRIGGER_CHANCE = 0.3 # 30% cơ hội kích hoạt PIR mỗi vòng lặp
 # Đường dẫn file
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ENV_PATH = os.path.join(SCRIPT_DIR, ".env")
-DATASET_PATH = os.path.join(SCRIPT_DIR, "src", "YolohomeModel", "led_control", "data", "smart_home_led_dataset.csv")
+DATASET_PATH = os.path.join(SCRIPT_DIR, "src", "YolohomeModel", "led_control", "data", "room_occupancy_led_control_dataset.csv")
 
 # ==========================================
 # 1. ĐỌC ADAFRUIT KEYS TỪ .ENV
@@ -91,8 +91,9 @@ try:
         row = df.iloc[current_row]
         
         temp = round(row["Temperature"], 1)
-        humid = round(row["Humidity"], 1)
+        humid = round(row["Humidity"], 1) if "Humidity" in row else random.randint(40, 75)
         light = round(row["Light_Intensity"], 1)
+        pir = int(row["PIR"]) if "PIR" in row else 0
         
         # In ra man hinh de theo doi
         print(f"Dang mo phong Dong {current_row}: Nhiet do={temp}C, Do am={humid}%, Anh sang={light} lux", flush=True)
@@ -101,15 +102,16 @@ try:
         send_to_adafruit("thermal", temp)
         send_to_adafruit("humid", humid)
         send_to_adafruit("light", light)
+        send_to_adafruit("pir", pir)
         
         # --- SIMULATE PIR ---
-        if random.random() < PIR_TRIGGER_CHANCE:
-            print(f"  [Simulator] MOTION DETECTED! Sending PIR=1...", flush=True)
-            send_to_adafruit("pir", "1")
-            # Doi mot chut roi reset PIR ve 0
-            time.sleep(2)
-            send_to_adafruit("pir", "0")
-            print(f"  [Simulator] Reset PIR=0", flush=True)
+        # if random.random() < PIR_TRIGGER_CHANCE:
+        #     print(f"  [Simulator] MOTION DETECTED! Sending PIR=1...", flush=True)
+        #     send_to_adafruit("pir", "1")
+        #     # Doi mot chut roi reset PIR ve 0
+        #     time.sleep(2)
+        #     send_to_adafruit("pir", "0")
+        #     print(f"  [Simulator] Reset PIR=0", flush=True)
         
         # Tùy chọn gửi thêm pump/earth-humid nếu muốn cho UI đẹp
         # send_to_adafruit("earth-humid", random.randint(40, 80))

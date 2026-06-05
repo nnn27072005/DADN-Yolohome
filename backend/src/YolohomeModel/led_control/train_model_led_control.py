@@ -2,16 +2,17 @@
 Train Random Forest model for LED Control in YoloHome.
 
 Default dataset:
-  UCI Appliances Energy Prediction, prepared by
-  prepare_uci_appliances_led_dataset.py.
+  UCI Room Occupancy Estimation, prepared by
+  prepare_room_occupancy_led_dataset.py.
 
 Input features used by the trained model:
+  - Light_Intensity (lux)
   - Temperature (C)
-  - Humidity (%)
+  - PIR (0/1)
   - Minute_Of_Day (0-1439)
 
 Target:
-  - LED_On (0/1): real household light energy usage mapped from `lights > 0`
+  - LED_On (0/1): derived from occupancy, lux, and time of day
 """
 
 import warnings
@@ -24,12 +25,12 @@ from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.preprocessing import StandardScaler
 
-from prepare_uci_appliances_led_dataset import prepare_uci_appliances_led_dataset
+from prepare_room_occupancy_led_dataset import prepare_room_occupancy_led_dataset
 
 
 warnings.filterwarnings("ignore")
 
-FEATURE_COLS = ["Temperature", "Humidity", "Minute_Of_Day"]
+FEATURE_COLS = ["Light_Intensity", "Temperature", "PIR", "Minute_Of_Day"]
 TARGET_COL = "LED_On"
 
 
@@ -50,10 +51,14 @@ def load_and_preprocess_data(path: Path) -> pd.DataFrame:
 
     print(f"Processed rows: {df.shape[0]}")
     print(
+        "  Light_Intensity range: "
+        f"{df['Light_Intensity'].min():.1f} - {df['Light_Intensity'].max():.1f} lux"
+    )
+    print(
         "  Temperature range:     "
         f"{df['Temperature'].min():.1f} - {df['Temperature'].max():.1f} C"
     )
-    print(f"  Humidity range:        {df['Humidity'].min():.1f} - {df['Humidity'].max():.1f} %")
+    print(f"  PIR ratio:             {df['PIR'].mean() * 100:.1f}%")
     print(f"  Minute_Of_Day range:   {df['Minute_Of_Day'].min()} - {df['Minute_Of_Day'].max()}")
     print(f"  LED ON ratio:          {df[TARGET_COL].mean() * 100:.1f}%")
 
@@ -122,13 +127,13 @@ if __name__ == "__main__":
 
     script_dir = Path(__file__).resolve().parent
     data_dir = script_dir / "data"
-    data_path = data_dir / "uci_appliances_led_control_balanced.csv"
+    data_path = data_dir / "room_occupancy_led_control_balanced.csv"
 
     if not data_path.exists():
-        prepare_uci_appliances_led_dataset(
-            zip_path=data_dir / "uci_appliances_energy_prediction.zip",
-            raw_csv_path=data_dir / "uci_appliances_energy_complete.csv",
-            output_path=data_dir / "uci_appliances_led_control_dataset.csv",
+        prepare_room_occupancy_led_dataset(
+            zip_path=data_dir / "room_occupancy_estimation.zip",
+            raw_csv_path=data_dir / "room_occupancy_estimation.csv",
+            output_path=data_dir / "room_occupancy_led_control_dataset.csv",
             balanced_output_path=data_path,
         )
 

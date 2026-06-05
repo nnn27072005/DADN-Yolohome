@@ -326,8 +326,7 @@ class SensorService {
             case "led":
               if (
                 latestSensorObj["light"] &&
-                latestSensorObj["thermal"] &&
-                latestSensorObj["humid"]
+                latestSensorObj["thermal"]
               ) {
                 const currentDate = new Date();
                 const minuteOfDay =
@@ -335,7 +334,7 @@ class SensorService {
                 relevantInputData = {
                   Light_Intensity: latestSensorObj["light"].value,
                   Temperature: latestSensorObj["thermal"].value,
-                  Humidity: latestSensorObj["humid"].value,
+                  PIR: latestSensorObj["pir"] ? latestSensorObj["pir"].value : 0,
                   Minute_Of_Day: minuteOfDay,
                 };
               } else {
@@ -352,7 +351,7 @@ class SensorService {
           if (!canPredict) {
             const requiredFeedsMap = {
               fan: ["thermal", "humid"],
-              led: ["light", "thermal", "humid"],
+              led: ["light", "thermal"],
             };
             const missingFeeds = (requiredFeedsMap[deviceName] || []).filter(
               (feed) => !latestSensorObj[feed],

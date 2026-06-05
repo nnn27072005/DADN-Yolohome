@@ -30,7 +30,7 @@ function getPrediction(deviceType, inputData) {
         requiredKeys = [
           "Light_Intensity",
           "Temperature",
-          "Humidity",
+          "PIR",
           "Minute_Of_Day",
         ];
         break;

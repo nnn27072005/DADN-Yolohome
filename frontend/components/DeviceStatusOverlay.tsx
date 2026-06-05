@@ -4,24 +4,19 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Dimensions,
   Animated,
   PanResponder,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useSegments } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { apiCall } from "@/utils/apiCall";
 import { useAuth } from "@/contexts/AuthContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { shadowStyle } from "@/utils/platformStyles";
-
-const { width, height } = Dimensions.get("window");
 
 const deviceIcons: Record<string, any> = {
   led: { lib: Ionicons, name: "bulb-outline", color: "#FFCC00", label: "Đèn RGB" },
   fan: { lib: MaterialCommunityIcons, name: "fan", color: "#007AFF", label: "Quạt" },
-  door: { lib: MaterialCommunityIcons, name: "door-open", color: "#FF3B30", label: "Cửa" },
 };
 
 const modeLabels: Record<string, string> = {
@@ -29,6 +24,8 @@ const modeLabels: Record<string, string> = {
   automatic: "Tự động",
   scheduled: "Hẹn giờ",
 };
+
+const settingDeviceNames = new Set(["led", "fan"]);
 
 const DeviceIcon = ({ name, status }: { name: string, status: boolean }) => {
   const rotation = useRef(new Animated.Value(0)).current;
@@ -68,6 +65,7 @@ const DeviceIcon = ({ name, status }: { name: string, status: boolean }) => {
 
 export default function DeviceStatusOverlay() {
   const segments = useSegments();
+  const router = useRouter();
   const { isAuthenticated } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -112,22 +110,15 @@ export default function DeviceStatusOverlay() {
     refetchInterval: 5000,
   });
 
-  const queryClient = useQueryClient();
+  const openDeviceSettings = (name: string) => {
+    if (!settingDeviceNames.has(name)) return;
 
-  const toggleMutation = useMutation({
-    mutationFn: async ({ name }: { name: string }) => {
-      return apiCall({
-        endpoint: `/settings/${name}/status`,
-        method: "PUT",
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["settings"] });
-    },
-    onError: (error) => {
-      console.error("[DeviceStatusOverlay] Failed to toggle device:", error);
-    },
-  });
+    setIsCollapsed(true);
+    router.push({
+      pathname: "/setting/[device_name]",
+      params: { device_name: name },
+    } as const);
+  };
 
   if (isSettingsPage || !isAuthenticated) return null;
 
@@ -166,18 +157,13 @@ export default function DeviceStatusOverlay() {
           <View style={styles.deviceList}>
             {devices && devices.length > 0 ? (
               devices
-                .filter((d) => ["led", "fan", "door"].includes(d.name))
+                .filter((d) => settingDeviceNames.has(d.name))
                 .map((device) => {
                   return (
                     <TouchableOpacity
                       key={device.name}
                       style={styles.deviceItem}
-                      onPress={() =>
-                        toggleMutation.mutate({
-                          name: device.name,
-                        })
-                      }
-                      disabled={toggleMutation.isPending}
+                      onPress={() => openDeviceSettings(device.name)}
                       activeOpacity={0.7}
                     >
                       <DeviceIcon name={device.name} status={device.status} />

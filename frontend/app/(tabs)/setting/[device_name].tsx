@@ -24,6 +24,8 @@ const deviceNameConst = {
   fan: "Quạt",
 };
 
+const settingDeviceNames = new Set(["led", "fan"]);
+
 const RadioButtonSection: React.FC<{
   initialValue: string;
   option: string;
@@ -81,10 +83,16 @@ export default function ConfigScreen() {
 
   let initialSettings;
 
+  useEffect(() => {
+    if (deviceName && !settingDeviceNames.has(deviceName)) {
+      router.replace("/setting");
+    }
+  }, [deviceName, router]);
+
   const { data: deviceSetting, isSuccess } = useQuery({
     queryKey: ["settings", deviceName],
     queryFn: () => apiCall({ endpoint: `/settings/${deviceName}` }),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && settingDeviceNames.has(deviceName),
   });
 
   useEffect(() => {

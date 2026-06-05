@@ -268,8 +268,7 @@ class SettingsService{
                     case "led":
                       if (
                         latestSensors["light"] &&
-                        latestSensors["thermal"] &&
-                        latestSensors["humid"]
+                        latestSensors["thermal"]
                       ) {
                           const currentDate = new Date();
 
@@ -280,7 +279,7 @@ class SettingsService{
                         relevantInputData = {
                           Light_Intensity: latestSensors["light"].value,
                           Temperature: latestSensors["thermal"].value,
-                          Humidity: latestSensors["humid"].value,
+                          PIR: latestSensors["pir"] ? latestSensors["pir"].value : 0,
                           Minute_Of_Day: minuteOfDay,
                         };
                       } else {
@@ -303,16 +302,19 @@ class SettingsService{
                       name,
                       relevantInputData
                     );
-                    predictedStatus = predictionResult === "BẬT"; //true/false
+                    predictedStatus =
+                      name === "led"
+                        ? parseInt(predictionResult, 10) === 1
+                        : predictionResult === "B\u1EACT"; //true/false
                     console.log(
                       `[SettingsService] Prediction result for device ${name}: ${predictedStatus}`
                     );
                   } else {
-                    const missingFeeds = [
-                      "thermal",
-                      "humid",
-                      "light",
-                    ].filter((feed) => !latestSensors[feed]);
+                    const requiredFeeds =
+                      name === "led" ? ["thermal", "light"] : ["thermal", "humid"];
+                    const missingFeeds = requiredFeeds.filter(
+                      (feed) => !latestSensors[feed]
+                    );
                     console.warn(
                       `Cannot predict for device ${name} due to missing sensor data: ${missingFeeds.join(
                         ", "
@@ -563,3 +565,4 @@ module.exports = new SettingsService();
 module.exports.calculateScheduledStatus = calculateScheduledStatus;
 module.exports.getFeedKey = getFeedKey;
 module.exports.determineMQttPayload = determineMQttPayload;
+

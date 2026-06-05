@@ -34,14 +34,14 @@ interface DeviceType {
 const devicesImage = {
   led: { lib: Ionicons, name: "bulb", color: "#4CD964" },
   fan: { lib: MaterialCommunityIcons, name: "fan", color: "#007AFF" },
-  door: { lib: MaterialCommunityIcons, name: "door-closed", color: "#FF9500" },
 };
 
 const deviceName = {
   led: "Đèn RGB",
   fan: "Quạt",
-  door: "Cửa chính",
 };
+
+const settingDeviceNames = new Set(["led", "fan"]);
 
 const modeName = {
   manual: "Thủ công",
@@ -199,9 +199,9 @@ export default function SettingTab() {
 
           <Text style={styles.sectionHeader}>Danh sách thiết bị</Text>
 
-          {deviceList && deviceList.filter((device: DeviceType) => ["led", "fan", "door"].includes(device.name)).length > 0 ? (
+          {deviceList && deviceList.filter((device: DeviceType) => settingDeviceNames.has(device.name)).length > 0 ? (
             deviceList
-              .filter((device: DeviceType) => ["led", "fan", "door"].includes(device.name))
+              .filter((device: DeviceType) => settingDeviceNames.has(device.name))
               .map((device: DeviceType, index: number) => (
                 <CardDevice key={index} {...device} />
               ))

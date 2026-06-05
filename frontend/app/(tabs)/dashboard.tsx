@@ -49,6 +49,18 @@ const generateRealtimeTestData = (): Data[] => {
 
 const testData = generateRealtimeTestData();
 
+const getRoundedMaxValue = (data: Data[], fallback: number) => {
+  const maxValue = Math.max(
+    ...data
+      .map((item) => Number(item.value))
+      .filter((value) => Number.isFinite(value)),
+    0
+  );
+
+  if (maxValue <= 0) return fallback;
+  return Math.ceil((maxValue * 1.2) / 10) * 10;
+};
+
 import ScreenBackground from "@/components/ScreenBackground";
 
 export default function DashboardScreen() {
@@ -115,6 +127,8 @@ export default function DashboardScreen() {
   const scrollRefTemp = useRef<any>(null);
   const scrollRefLight = useRef<any>(null);
   const scrollRefHum = useRef<any>(null);
+  const lightChartData = dataLight && dataLight.length > 0 ? dataLight : testData;
+  const lightMaxValue = getRoundedMaxValue(lightChartData, 100);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -227,9 +241,9 @@ export default function DashboardScreen() {
               <Text style={styles.unit}>lux</Text>
             </View>
             <LineChart
-              data={dataLight && dataLight.length > 0 ? dataLight : testData}
+              data={lightChartData}
               {...chartConfig}
-              maxValue={800}
+              maxValue={lightMaxValue}
               color="#FFCC00"
               startFillColor="rgba(229, 199, 0, 0.7)"
               endFillColor="rgba(255, 240, 240, 0.43)"

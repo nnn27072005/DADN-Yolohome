@@ -347,7 +347,7 @@ export default function ConfigScreen({ id }: { id: string }) {
       }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <>
+        <View style={styles.dismissArea}>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()}>
               <Ionicons name="arrow-back" size={24} />
@@ -380,7 +380,7 @@ export default function ConfigScreen({ id }: { id: string }) {
               <Text style={{ color: "#fff", fontWeight: "bold" }}>Lưu</Text>
             </TouchableOpacity>
           </View>
-        </>
+        </View>
       </TouchableWithoutFeedback>
     </SafeAreaView>
   );
@@ -391,6 +391,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F5F5F7",
     padding: 20,
+    gap: 16,
+  },
+  dismissArea: {
+    flex: 1,
     gap: 16,
   },
   header: {
